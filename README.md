@@ -1,8 +1,7 @@
+## design: removes ~the feeling of~ pâro when ordering food delivery
 **pâro** n. the feeling that everything you do is always somehow wrong
 
-## design: removes ~the feeling of~ pâro when ordering food delivery
-
-currently operates at an API level with preset food ordering options, with plans to expand into a web app (for more customizability)
+POC: currently operates at an API level with preset food ordering options, with plans to expand into a web app (for more customizability)
 
 <div align="center">
   <img src="img/screenshot_1.png" width="45%" />
@@ -14,7 +13,7 @@ currently operates at an API level with preset food ordering options, with plans
 **POS Platform Integrations**
 - Uber Eats
 - Sweetgreens
-- *Weedmaps*
+- Weedmaps
 
 **Tools**
 - Swift
