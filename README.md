@@ -1,6 +1,6 @@
 **pâro** n. the feeling that everything you do is always somehow wrong
 
-## removes ~the feeling of~ pâro when ordering delivery
+## design: removes ~the feeling of~ pâro when ordering food delivery
 
 currently operates at an API level with preset food ordering options, with plans to expand into a web app (for more customizability)
 
@@ -11,10 +11,10 @@ currently operates at an API level with preset food ordering options, with plans
 
 <br>
 
-**POS Integrations**
+**POS Platform Integrations**
 - Uber Eats
 - Sweetgreens
-- Weedmaps
+- *Weedmaps*
 
 **Tools**
 - Swift
