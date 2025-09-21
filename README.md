@@ -19,5 +19,4 @@ POC: currently operates at an API level with preset food ordering options, with 
 
 **Tools**
 - Swift
-- Redis
 - Google Cloud Platform
