@@ -19,4 +19,4 @@ currently operates at an API level with preset food ordering options, with plans
 **Tools**
 - Swift
 - Redis
-- Vercel
+- Google Cloud Platform
