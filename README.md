@@ -3,7 +3,7 @@
 
 <br>
 
-POC: currently operates at an API level with preset food ordering options, with plans to expand into a web app (for more customizability)
+POC: currently operates at an API level with preset food ordering options, with plans to expand into a web app (node.js)
 
 <div align="center">
   <img src="img/screenshot_1.png" width="45%" />
