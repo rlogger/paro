@@ -1,6 +1,8 @@
 ## design: removes ~the feeling of~ pâro when ordering food delivery
 **pâro** n. the feeling that everything you do is always somehow wrong
 
+<br>
+
 POC: currently operates at an API level with preset food ordering options, with plans to expand into a web app (for more customizability)
 
 <div align="center">
