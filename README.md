@@ -1,4 +1,4 @@
-## design: removes ~the feeling of~ pâro when ordering food delivery
+## design: removes guilt tripping when ordering food delivery
 **pâro** n. the feeling that everything you do is always somehow wrong
 
 <br>
