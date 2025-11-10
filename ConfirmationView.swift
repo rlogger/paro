@@ -2,79 +2,74 @@
 //  ConfirmationView.swift
 //  eater
 //
+//  View displaying order confirmation details
+//
 
 import SwiftUI
 
+/// View that displays order confirmation with all order details
 struct ConfirmationView: View {
-    let selectedCuisines: [String]
+    // MARK: - Properties
+
+    /// The completed order to display
+    let order: Order
+
+    /// Environment property to dismiss the view
     @Environment(\.dismiss) private var dismiss
-    
-    // Generate random confirmation code
-    @State private var confirmationCode = String(Int.random(in: 100000...999999))
-    
+
+    // MARK: - Body
+
     var body: some View {
         GeometryReader { geometry in
             VStack(alignment: .leading, spacing: 0) {
-                
-                // Confirmation Code
-                Text(confirmationCode)
+
+                // MARK: - Confirmation Code
+                Text(order.confirmationCode)
                     .font(.system(size: min(geometry.size.width * 0.15, 80), weight: .black))
                     .foregroundColor(.black)
                     .padding(.top, geometry.size.height * 0.08)
                     .padding(.horizontal, 20)
-                
-                // Spacer
+
                 Spacer()
                     .frame(height: geometry.size.height * 0.06)
-                
-                // Order Details
+
+                // MARK: - Order Details Section
+                orderDetailsSection(geometry: geometry)
+
+                Spacer()
+                    .frame(height: geometry.size.height * 0.08)
+
+                // MARK: - Total Price
+                if let totalPrice = order.totalPrice {
+                    Text("After \(order.platform ?? "delivery"): $\(String(format: "%.2f", totalPrice))")
+                        .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 20)
+
+                    Spacer()
+                        .frame(height: geometry.size.height * 0.08)
+                }
+
+                // MARK: - Delivery Information
                 VStack(alignment: .leading, spacing: geometry.size.height * 0.02) {
-                    
-                    // Uber Eats
-                    Text("Uber Eats")
-                        .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
-                        .foregroundColor(.black)
-                    
-                    // Pad Thai Noodles
-                    Text("Pad Thai Noodles")
-                        .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
-                        .foregroundColor(.black)
-                    
-                    // Choice of Protein
-                    Text("Choice of Protein: Vegetables")
+                    Text("Delivery updates will be sent over text")
                         .font(.system(size: min(geometry.size.width * 0.06, 30), weight: .medium))
                         .foregroundColor(.black)
-                    
-                    // Price
-                    Text("Price $13.95")
-                        .font(.system(size: min(geometry.size.width * 0.06, 30), weight: .medium))
-                        .foregroundColor(.black)
-                    
+
+                    Text("Order Status: \(order.status.rawValue)")
+                        .font(.system(size: min(geometry.size.width * 0.05, 25), weight: .medium))
+                        .foregroundColor(.gray)
+
+                    Text("Order placed: \(formattedDate(order.timestamp))")
+                        .font(.system(size: min(geometry.size.width * 0.05, 25), weight: .medium))
+                        .foregroundColor(.gray)
                 }
                 .padding(.horizontal, 20)
-                
-                // Spacer
+
                 Spacer()
-                    .frame(height: geometry.size.height * 0.08)
-                
-                // After Uber Eats
-                Text("After Uber Eats: $23.80")
-                    .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 20)
-                
-                // Spacer
-                Spacer()
-                    .frame(height: geometry.size.height * 0.08)
-                
-                // Delivery Updates
-                Text("Delivery updates will be sent over text")
-                    .font(.system(size: min(geometry.size.width * 0.06, 30), weight: .medium))
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 20)
-                
-                // Fill remaining space
-                Spacer()
+
+                // MARK: - Done Button
+                doneButton(geometry: geometry)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
@@ -82,4 +77,96 @@ struct ConfirmationView: View {
         .ignoresSafeArea()
         .background(Color.white)
     }
+
+    // MARK: - View Components
+
+    /// Creates the order details section
+    /// - Parameter geometry: Geometry proxy for responsive sizing
+    /// - Returns: A view containing order details
+    private func orderDetailsSection(geometry: GeometryProxy) -> some View {
+        VStack(alignment: .leading, spacing: geometry.size.height * 0.02) {
+
+            // Platform name
+            if let platform = order.platform {
+                Text(platform)
+                    .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
+                    .foregroundColor(.black)
+            }
+
+            // Item name
+            if let itemName = order.itemName {
+                Text(itemName)
+                    .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
+                    .foregroundColor(.black)
+            }
+
+            // Customization details
+            if let customization = order.customization {
+                Text(customization)
+                    .font(.system(size: min(geometry.size.width * 0.06, 30), weight: .medium))
+                    .foregroundColor(.black)
+            }
+
+            // Base price
+            if let price = order.price {
+                Text("Price: $\(String(format: "%.2f", price))")
+                    .font(.system(size: min(geometry.size.width * 0.06, 30), weight: .medium))
+                    .foregroundColor(.black)
+            }
+
+            // Selected cuisines
+            if !order.cuisines.isEmpty {
+                Text("Cuisines: \(order.cuisines.joined(separator: ", "))")
+                    .font(.system(size: min(geometry.size.width * 0.05, 25), weight: .medium))
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+
+    /// Creates the done button to dismiss the view
+    /// - Parameter geometry: Geometry proxy for responsive sizing
+    /// - Returns: A configured done button
+    private func doneButton(geometry: GeometryProxy) -> some View {
+        Button(action: {
+            // Dismiss both the confirmation view and the cuisine selection view
+            dismiss()
+        }) {
+            Text("Done")
+                .font(.system(size: min(geometry.size.width * 0.08, 40), weight: .black))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: geometry.size.height * 0.08)
+                .background(Color.black)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.bottom, geometry.size.height * 0.05)
+    }
+
+    // MARK: - Helper Methods
+
+    /// Formats a date into a readable string
+    /// - Parameter date: The date to format
+    /// - Returns: A formatted date string
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - Preview
+
+#Preview {
+    // Create a sample order for preview
+    var sampleOrder = Order(cuisines: ["Thai", "Italian"])
+    sampleOrder.platform = "Uber Eats"
+    sampleOrder.itemName = "Pad Thai Noodles"
+    sampleOrder.customization = "Choice of Protein: Vegetables"
+    sampleOrder.price = 13.95
+    sampleOrder.totalPrice = 23.80
+    sampleOrder.status = .submitted
+
+    return ConfirmationView(order: sampleOrder)
 }
