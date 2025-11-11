@@ -1,0 +1,412 @@
+=================================================================
+EATER APP - SERVER-SIDE CONFIGURATION
+=================================================================
+Last Updated: 2025-11-11
+Environment: Production
+
+=================================================================
+1. POSTMATES API CONFIGURATION
+=================================================================
+
+API Endpoint: https://api.postmates.com/v1/
+API Version: v1
+Documentation: https://postmates.com/developer/docs/
+
+--- Authentication ---
+Customer ID: [YOUR_POSTMATES_CUSTOMER_ID]
+API Key: [YOUR_POSTMATES_API_KEY]
+API Secret: [YOUR_POSTMATES_API_SECRET]
+Auth Type: Basic Authentication (API_KEY:)
+
+--- API Endpoints ---
+Delivery Quote: POST /customers/{customer_id}/delivery_quotes
+Create Delivery: POST /customers/{customer_id}/deliveries
+List Deliveries: GET /customers/{customer_id}/deliveries
+Delivery Details: GET /customers/{customer_id}/deliveries/{delivery_id}
+Cancel Delivery: POST /customers/{customer_id}/deliveries/{delivery_id}/cancel
+Get Delivery Zones: GET /v1/delivery_zones
+
+--- Rate Limits ---
+Requests per minute: 1000
+Burst limit: 5000
+
+--- Webhook Configuration ---
+Webhook URL: https://your-backend-server.com/api/webhooks/postmates
+Webhook Events: delivery.status, delivery.updated, delivery.delivered, delivery.canceled
+Webhook Secret: [YOUR_WEBHOOK_SECRET]
+
+=================================================================
+2. FIREBASE CONFIGURATION
+=================================================================
+
+--- Firebase Project Details ---
+Project ID: eater-app-[UNIQUE_ID]
+Project Name: Eater
+Region: us-central1
+
+--- Firebase Authentication ---
+Enabled Providers:
+  - Email/Password: ENABLED
+  - Google Sign-In: ENABLED
+  - Apple Sign-In: ENABLED
+  - Phone Authentication: ENABLED
+
+Auth Domain: eater-app-[UNIQUE_ID].firebaseapp.com
+
+--- iOS App Configuration ---
+Bundle ID: com.eater.app
+App ID: [YOUR_FIREBASE_IOS_APP_ID]
+GoogleService-Info.plist: [REQUIRED - Download from Firebase Console]
+
+--- Firebase API Keys ---
+API Key (iOS): [YOUR_FIREBASE_IOS_API_KEY]
+Web API Key: [YOUR_FIREBASE_WEB_API_KEY]
+Server Key (FCM): [YOUR_FIREBASE_SERVER_KEY]
+
+--- Firebase Database ---
+Firestore Database: ENABLED
+Database ID: (default)
+Location: us-central1
+Mode: Production
+
+--- Firestore Collections Structure ---
+users/
+  {userId}/
+    - email: string
+    - displayName: string
+    - phoneNumber: string
+    - createdAt: timestamp
+    - lastLogin: timestamp
+    - preferences: map
+
+orders/
+  {orderId}/
+    - userId: string
+    - cuisines: array
+    - platform: string
+    - status: string
+    - itemName: string
+    - customization: string
+    - price: number
+    - totalPrice: number
+    - deliveryAddress: string
+    - postmatesDeliveryId: string
+    - confirmationCode: string
+    - createdAt: timestamp
+    - updatedAt: timestamp
+
+deliveryAddresses/
+  {userId}/
+    addresses/
+      {addressId}/
+        - address: string
+        - city: string
+        - state: string
+        - zipCode: string
+        - isDefault: boolean
+
+--- Firebase Storage ---
+Storage Bucket: eater-app-[UNIQUE_ID].appspot.com
+Max Upload Size: 10MB
+
+--- Firebase Cloud Messaging (FCM) ---
+FCM Sender ID: [YOUR_FCM_SENDER_ID]
+FCM Token: [GENERATED_PER_DEVICE]
+Purpose: Delivery status notifications
+
+=================================================================
+3. BACKEND SERVER CONFIGURATION
+=================================================================
+
+--- Server Details ---
+Platform: Node.js (Recommended) / Python / Go
+Framework: Express.js / FastAPI / Gin
+Hosting: Google Cloud Run / AWS Lambda / Vercel
+Base URL: https://your-backend-server.com
+
+--- Environment Variables (.env) ---
+NODE_ENV=production
+PORT=8080
+
+# Postmates
+POSTMATES_CUSTOMER_ID=[YOUR_POSTMATES_CUSTOMER_ID]
+POSTMATES_API_KEY=[YOUR_POSTMATES_API_KEY]
+POSTMATES_API_SECRET=[YOUR_POSTMATES_API_SECRET]
+POSTMATES_WEBHOOK_SECRET=[YOUR_WEBHOOK_SECRET]
+
+# Firebase
+FIREBASE_PROJECT_ID=eater-app-[UNIQUE_ID]
+FIREBASE_PRIVATE_KEY=[YOUR_FIREBASE_ADMIN_SDK_PRIVATE_KEY]
+FIREBASE_CLIENT_EMAIL=[YOUR_FIREBASE_SERVICE_ACCOUNT_EMAIL]
+FIREBASE_DATABASE_URL=https://eater-app-[UNIQUE_ID].firebaseio.com
+
+# Security
+JWT_SECRET=[YOUR_JWT_SECRET_KEY]
+ENCRYPTION_KEY=[YOUR_ENCRYPTION_KEY]
+ALLOWED_ORIGINS=https://eater-app.com,http://localhost:3000
+
+# Other APIs (Future Integration)
+UBER_EATS_API_KEY=[YOUR_UBER_EATS_KEY]
+DOORDASH_API_KEY=[YOUR_DOORDASH_KEY]
+
+=================================================================
+4. API ENDPOINTS (Backend Server)
+=================================================================
+
+--- Authentication Endpoints ---
+POST   /api/auth/register          - Register new user
+POST   /api/auth/login             - Login user
+POST   /api/auth/logout            - Logout user
+POST   /api/auth/refresh-token     - Refresh JWT token
+POST   /api/auth/verify-phone      - Verify phone number
+GET    /api/auth/user              - Get current user profile
+
+--- Order Endpoints ---
+POST   /api/orders                 - Create new order
+GET    /api/orders                 - List user orders
+GET    /api/orders/:id             - Get order details
+PATCH  /api/orders/:id             - Update order
+DELETE /api/orders/:id             - Cancel order
+GET    /api/orders/:id/status      - Get order delivery status
+
+--- Delivery Endpoints ---
+POST   /api/delivery/quote         - Get delivery quote from Postmates
+POST   /api/delivery/create        - Create Postmates delivery
+GET    /api/delivery/:id           - Get delivery details
+POST   /api/delivery/:id/cancel    - Cancel delivery
+
+--- Webhook Endpoints ---
+POST   /api/webhooks/postmates     - Postmates webhook handler
+POST   /api/webhooks/firebase      - Firebase webhook handler
+
+--- User Endpoints ---
+GET    /api/users/profile          - Get user profile
+PATCH  /api/users/profile          - Update user profile
+GET    /api/users/addresses        - Get saved addresses
+POST   /api/users/addresses        - Add new address
+PATCH  /api/users/addresses/:id    - Update address
+DELETE /api/users/addresses/:id    - Delete address
+
+=================================================================
+5. SECURITY CONFIGURATION
+=================================================================
+
+--- Firebase Security Rules (Firestore) ---
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can only read/write their own orders
+    match /orders/{orderId} {
+      allow read: if request.auth != null &&
+                     resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+                       resource.data.userId == request.auth.uid;
+    }
+
+    // Users can only access their own addresses
+    match /deliveryAddresses/{userId}/{document=**} {
+      allow read, write: if request.auth != null &&
+                            request.auth.uid == userId;
+    }
+  }
+}
+
+--- API Authentication Flow ---
+1. User signs in via Firebase Authentication
+2. Firebase returns ID token
+3. App sends ID token with each API request in Authorization header
+4. Backend verifies token with Firebase Admin SDK
+5. Backend processes request and returns response
+
+--- Request Headers ---
+Authorization: Bearer [FIREBASE_ID_TOKEN]
+Content-Type: application/json
+X-API-Version: 1.0
+
+=================================================================
+6. POSTMATES DELIVERY FLOW
+=================================================================
+
+Step 1: User Authentication
+  - User signs in with Firebase (Email/Phone/Google/Apple)
+  - Firebase generates and returns ID token
+  - App stores token securely in Keychain
+
+Step 2: Order Creation
+  - User selects cuisines in app
+  - App sends order request to backend with Firebase token
+  - Backend verifies token and authenticates user
+
+Step 3: Delivery Quote
+  - Backend calls Postmates API to get delivery quote
+  - Postmates returns quote with estimated time and cost
+  - Backend returns quote to app for user confirmation
+
+Step 4: Order Placement
+  - User confirms order
+  - Backend creates Postmates delivery request
+  - Postmates assigns courier and returns delivery ID
+  - Backend saves order to Firestore with Postmates delivery ID
+
+Step 5: Order Tracking
+  - Backend receives webhook updates from Postmates
+  - Backend updates order status in Firestore
+  - Firebase triggers push notification to user via FCM
+  - App displays real-time delivery status
+
+Step 6: Order Completion
+  - Postmates marks delivery as completed
+  - Backend updates final status in Firestore
+  - User receives completion notification
+
+=================================================================
+7. POSTMATES API REQUEST EXAMPLES
+=================================================================
+
+--- Get Delivery Quote ---
+curl -X POST https://api.postmates.com/v1/customers/{customer_id}/delivery_quotes \
+  -u "{api_key}:" \
+  -d "pickup_address=20 McAllister St, San Francisco, CA" \
+  -d "dropoff_address=101 Market St, San Francisco, CA"
+
+--- Create Delivery ---
+curl -X POST https://api.postmates.com/v1/customers/{customer_id}/deliveries \
+  -u "{api_key}:" \
+  -d "pickup_name=Eater Restaurant" \
+  -d "pickup_address=20 McAllister St, San Francisco, CA" \
+  -d "pickup_phone_number=4155555555" \
+  -d "dropoff_name=John Doe" \
+  -d "dropoff_address=101 Market St, San Francisco, CA" \
+  -d "dropoff_phone_number=4155556666" \
+  -d "manifest=Thai Food Order" \
+  -d "quote_id={quote_id}"
+
+--- List Deliveries ---
+curl https://api.postmates.com/v1/customers/{customer_id}/deliveries \
+  -u "{api_key}:"
+
+--- Get Delivery Status ---
+curl https://api.postmates.com/v1/customers/{customer_id}/deliveries/{delivery_id} \
+  -u "{api_key}:"
+
+--- Cancel Delivery ---
+curl -X POST https://api.postmates.com/v1/customers/{customer_id}/deliveries/{delivery_id}/cancel \
+  -u "{api_key}:"
+
+=================================================================
+8. FIREBASE AUTHENTICATION CODE SNIPPETS
+=================================================================
+
+--- iOS Swift (Sign In with Email) ---
+import FirebaseAuth
+
+Auth.auth().signIn(withEmail: email, password: password) { result, error in
+    if let error = error {
+        print("Error: \(error.localizedDescription)")
+        return
+    }
+
+    guard let user = result?.user else { return }
+
+    user.getIDToken { token, error in
+        if let token = token {
+            // Use this token for backend API calls
+            print("Firebase Token: \(token)")
+        }
+    }
+}
+
+--- iOS Swift (Sign In with Google) ---
+import FirebaseAuth
+import GoogleSignIn
+
+GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { result, error in
+    guard let user = result?.user,
+          let idToken = user.idToken?.tokenString else {
+        return
+    }
+
+    let credential = GoogleAuthProvider.credential(
+        withIDToken: idToken,
+        accessToken: user.accessToken.tokenString
+    )
+
+    Auth.auth().signIn(with: credential) { result, error in
+        // Handle sign in
+    }
+}
+
+--- iOS Swift (Get Current User Token) ---
+if let currentUser = Auth.auth().currentUser {
+    currentUser.getIDTokenForcingRefresh(true) { token, error in
+        if let token = token {
+            // Use this token for API requests
+            UserDefaults.standard.set(token, forKey: "firebaseToken")
+        }
+    }
+}
+
+=================================================================
+9. MONITORING & LOGGING
+=================================================================
+
+--- Firebase Analytics Events ---
+- user_signup: When user creates account
+- user_login: When user signs in
+- order_placed: When order is submitted
+- order_completed: When order is delivered
+- delivery_tracking_viewed: When user checks delivery status
+
+--- Error Tracking ---
+Service: Sentry / Crashlytics
+Track: API failures, authentication errors, delivery failures
+
+--- Performance Monitoring ---
+Service: Firebase Performance Monitoring
+Track: API response times, app startup time, screen rendering
+
+=================================================================
+10. TESTING CREDENTIALS
+=================================================================
+
+--- Postmates Sandbox ---
+API Endpoint: https://api.postmates.com/v1/
+Test Customer ID: [SANDBOX_CUSTOMER_ID]
+Test API Key: [SANDBOX_API_KEY]
+
+--- Firebase Test Accounts ---
+Test Email: test@eater.app
+Test Password: [TEST_PASSWORD]
+Test Phone: +1 555-123-4567
+
+=================================================================
+11. DEPLOYMENT CHECKLIST
+=================================================================
+
+☐ Set up Postmates developer account
+☐ Obtain Postmates API credentials
+☐ Create Firebase project
+☐ Enable Firebase Authentication providers
+☐ Set up Firestore database with security rules
+☐ Download GoogleService-Info.plist for iOS
+☐ Configure Firebase Cloud Messaging
+☐ Set up backend server (Node.js/Python)
+☐ Deploy backend to cloud platform
+☐ Configure environment variables
+☐ Set up Postmates webhook endpoint
+☐ Test authentication flow
+☐ Test order placement flow
+☐ Test delivery tracking
+☐ Set up error monitoring
+☐ Configure analytics
+☐ Test in production
+
+=================================================================
+END OF CONFIGURATION
+=================================================================

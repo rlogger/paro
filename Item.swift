@@ -242,3 +242,49 @@ struct OrderResponse: Codable {
         let totalPrice: Double
     }
 }
+
+// MARK: - Delivery Quote
+
+/**
+ Represents a delivery quote from Postmates.
+
+ Contains pricing and timing information for a potential delivery.
+ Used to show users the cost and estimated delivery time before confirming order.
+
+ - Note: Conforms to `Codable` for API communication.
+ */
+struct DeliveryQuote: Codable {
+    /// Unique quote identifier
+    let id: String
+
+    /// Delivery fee in cents (e.g., 599 = $5.99)
+    let fee: Int
+
+    /// Currency code (e.g., "usd")
+    let currency: String
+
+    /// Estimated delivery time in minutes
+    let duration: Int
+
+    /// ISO 8601 timestamp when the quote expires
+    let expires: String
+
+    /// Formatted delivery fee for display
+    var formattedFee: String {
+        let dollars = Double(fee) / 100.0
+        return String(format: "$%.2f", dollars)
+    }
+}
+
+/**
+ Request structure for getting a delivery quote.
+
+ - Note: Conforms to `Codable` for JSON serialization.
+ */
+struct DeliveryQuoteRequest: Codable {
+    /// Pickup address (restaurant location)
+    let pickupAddress: String
+
+    /// Dropoff address (customer location)
+    let dropoffAddress: String
+}
