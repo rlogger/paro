@@ -115,7 +115,152 @@ FCM Token: [GENERATED_PER_DEVICE]
 Purpose: Delivery status notifications
 
 =================================================================
-3. BACKEND SERVER CONFIGURATION
+3. TWILIO API CONFIGURATION (SMS Notifications)
+=================================================================
+
+API Endpoint: https://api.twilio.com/2010-04-01/
+Documentation: https://www.twilio.com/docs/sms
+
+--- Authentication ---
+Account SID: [YOUR_TWILIO_ACCOUNT_SID]
+Auth Token: [YOUR_TWILIO_AUTH_TOKEN]
+Auth Type: Basic Authentication (Account SID:Auth Token)
+
+--- Phone Numbers ---
+Twilio Phone Number: +1[YOUR_TWILIO_NUMBER]
+  - Must be purchased from Twilio Console
+  - Used as "from" number for all SMS
+  - Supports SMS and MMS
+
+--- API Endpoints ---
+Send SMS: POST /Accounts/{AccountSid}/Messages.json
+Get Message: GET /Accounts/{AccountSid}/Messages/{MessageSid}.json
+List Messages: GET /Accounts/{AccountSid}/Messages.json
+
+--- Rate Limits ---
+Default: 100 requests per second
+Can be increased by contacting Twilio support
+
+--- Messaging Configuration ---
+Message Length: Up to 1600 characters (billed as segments)
+  - 1-160 characters = 1 segment
+  - 161-306 characters = 2 segments
+  - 307-459 characters = 3 segments
+
+Character Encoding: UTF-8 (supports emojis)
+
+--- SMS Use Cases in Eater App ---
+1. Authentication:
+   - Phone number verification codes
+   - Two-factor authentication
+   - Account recovery
+
+2. Order Notifications:
+   - Order confirmation
+   - Order status updates (preparing, out for delivery)
+   - Courier arrival alerts
+   - Delivery completion
+
+3. Real-time Updates:
+   - Push notifications via SMS as fallback
+   - Time-sensitive delivery updates
+
+--- SMS Templates ---
+
+Order Confirmation:
+"""
+🥕 Eater Order Confirmed!
+
+Order #[CONFIRMATION_CODE]
+Platform: [PLATFORM_NAME]
+Item: [ITEM_NAME]
+Total: $[TOTAL_PRICE]
+
+Track your order in the app!
+"""
+
+Status Update - Preparing:
+"""
+🍳 Your order #[ORDER_ID] is being prepared!
+"""
+
+Status Update - Out for Delivery:
+"""
+🚗 Your order #[ORDER_ID] is out for delivery! Your food will arrive soon.
+"""
+
+Status Update - Delivered:
+"""
+✅ Your order #[ORDER_ID] has been delivered! Enjoy your meal!
+"""
+
+Verification Code:
+"""
+Your Eater verification code is: [CODE]
+
+This code will expire in 10 minutes.
+Do not share this code with anyone.
+"""
+
+Courier Nearby:
+"""
+🚨 Your delivery is almost here! Order #[ORDER_ID] will arrive in approximately [MINUTES] minute(s).
+"""
+
+--- Twilio Webhook Configuration ---
+Webhook URL: https://your-backend-server.com/api/webhooks/twilio
+Webhook Events:
+  - message.status.delivered
+  - message.status.failed
+  - message.status.sent
+
+Webhook Method: POST
+Webhook Format: application/x-www-form-urlencoded
+
+--- Error Handling ---
+Error Codes to Handle:
+  - 21211: Invalid phone number
+  - 21408: Permission to send not enabled (phone number not verified)
+  - 21610: Message blocked (unsubscribed recipient)
+  - 30003: Unreachable destination number
+  - 30005: Unknown destination number
+  - 30006: Landline or unreachable carrier
+
+--- Cost Optimization ---
+- Use message templates to reduce errors
+- Implement opt-out management
+- Track delivery status to avoid duplicate sends
+- Use Twilio Verify API for phone verification (costs less)
+
+--- Security Best Practices ---
+1. Store credentials in environment variables
+2. Use HTTPS for all webhook endpoints
+3. Validate webhook signatures
+4. Implement rate limiting
+5. Never expose Auth Token in client-side code
+
+--- Twilio Verify API (Recommended for Phone Auth) ---
+Alternative to sending manual verification codes:
+
+Send Verification:
+POST /Services/{ServiceSid}/Verifications
+Body: { "To": "+14155551234", "Channel": "sms" }
+
+Verify Code:
+POST /Services/{ServiceSid}/VerificationCheck
+Body: { "To": "+14155551234", "Code": "123456" }
+
+Benefits:
+- Automatic code generation
+- Built-in rate limiting
+- Fraud detection
+- Lower cost than standard SMS
+- Automatic retry logic
+
+Service SID: [YOUR_TWILIO_VERIFY_SERVICE_SID]
+
+=================================================================
+4. BACKEND SERVER CONFIGURATION
 =================================================================
 
 --- Server Details ---
@@ -140,6 +285,12 @@ FIREBASE_PRIVATE_KEY=[YOUR_FIREBASE_ADMIN_SDK_PRIVATE_KEY]
 FIREBASE_CLIENT_EMAIL=[YOUR_FIREBASE_SERVICE_ACCOUNT_EMAIL]
 FIREBASE_DATABASE_URL=https://eater-app-[UNIQUE_ID].firebaseio.com
 
+# Twilio
+TWILIO_ACCOUNT_SID=[YOUR_TWILIO_ACCOUNT_SID]
+TWILIO_AUTH_TOKEN=[YOUR_TWILIO_AUTH_TOKEN]
+TWILIO_PHONE_NUMBER=+1[YOUR_TWILIO_NUMBER]
+TWILIO_VERIFY_SERVICE_SID=[YOUR_TWILIO_VERIFY_SERVICE_SID]
+
 # Security
 JWT_SECRET=[YOUR_JWT_SECRET_KEY]
 ENCRYPTION_KEY=[YOUR_ENCRYPTION_KEY]
@@ -154,12 +305,13 @@ DOORDASH_API_KEY=[YOUR_DOORDASH_KEY]
 =================================================================
 
 --- Authentication Endpoints ---
-POST   /api/auth/register          - Register new user
-POST   /api/auth/login             - Login user
-POST   /api/auth/logout            - Logout user
-POST   /api/auth/refresh-token     - Refresh JWT token
-POST   /api/auth/verify-phone      - Verify phone number
-GET    /api/auth/user              - Get current user profile
+POST   /api/auth/register                 - Register new user
+POST   /api/auth/login                    - Login user
+POST   /api/auth/logout                   - Logout user
+POST   /api/auth/refresh-token            - Refresh JWT token
+POST   /api/auth/send-verification        - Send SMS verification code (Twilio)
+POST   /api/auth/verify-phone             - Verify phone number with SMS code
+GET    /api/auth/user                     - Get current user profile
 
 --- Order Endpoints ---
 POST   /api/orders                 - Create new order
@@ -175,9 +327,16 @@ POST   /api/delivery/create        - Create Postmates delivery
 GET    /api/delivery/:id           - Get delivery details
 POST   /api/delivery/:id/cancel    - Cancel delivery
 
+--- Notification Endpoints (Twilio SMS) ---
+POST   /api/notifications/sms               - Send SMS notification
+POST   /api/notifications/order-confirmation - Send order confirmation SMS
+POST   /api/notifications/status-update     - Send order status update SMS
+POST   /api/notifications/courier-alert     - Send courier arrival alert
+
 --- Webhook Endpoints ---
 POST   /api/webhooks/postmates     - Postmates webhook handler
 POST   /api/webhooks/firebase      - Firebase webhook handler
+POST   /api/webhooks/twilio        - Twilio SMS status webhook handler
 
 --- User Endpoints ---
 GET    /api/users/profile          - Get user profile
