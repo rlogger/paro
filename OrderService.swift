@@ -256,6 +256,9 @@ class OrderService {
                     order.totalPrice = orderDetails.totalPrice
                     order.status = .submitted
 
+                    // Send order confirmation SMS notification
+                    self?.sendOrderNotification(order: order)
+
                     completion(.success(order))
                 } else {
                     let message = response.message ?? "Order placement failed"
@@ -472,6 +475,49 @@ class OrderService {
         }
 
         task.resume()
+    }
+
+    // MARK: - Notification Helpers
+
+    /**
+     Sends SMS notification for successful order placement.
+
+     Automatically triggers an SMS notification via NotificationService when
+     an order is successfully placed. This notifies the user about their order
+     confirmation with key details.
+
+     - Parameter order: The successfully placed order
+
+     - Note: This method fires asynchronously and does not block the order flow.
+             If SMS fails, the order is still considered successful.
+     */
+    private func sendOrderNotification(order: Order) {
+        // Get user's phone number from current user
+        // TODO: Replace with actual phone number from user profile
+        // For now, this is a placeholder - phone number should come from:
+        // 1. Firebase user profile (if using Firebase Phone Auth)
+        // 2. Backend API user profile endpoint
+        // 3. Cached user data in UserDefaults/Keychain
+
+        guard let currentUser = AuthService.shared.getCurrentUser(),
+              let phoneNumber = currentUser.phoneNumber else {
+            print("⚠️ No phone number available for SMS notification")
+            return
+        }
+
+        // Send order confirmation SMS
+        NotificationService.shared.sendOrderConfirmation(
+            to: phoneNumber,
+            order: order
+        ) { result in
+            switch result {
+            case .success:
+                print("✅ Order confirmation SMS sent successfully")
+            case .failure(let error):
+                print("⚠️ Failed to send order confirmation SMS: \(error.localizedDescription)")
+                // Don't fail the order if SMS fails - it's a nice-to-have
+            }
+        }
     }
 
     /**

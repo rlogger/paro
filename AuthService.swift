@@ -267,6 +267,241 @@ class AuthService {
         }
     }
 
+    // MARK: - SMS Authentication (Twilio)
+
+    /**
+     Initiates SMS authentication by sending a verification code.
+
+     Sends a 6-digit verification code to the user's phone number via SMS.
+     The code is valid for 10 minutes and can be used to verify phone ownership.
+
+     - Parameters:
+       - phoneNumber: User's phone number in E.164 format (e.g., +14155551234)
+       - completion: Completion handler with Result containing verification ID or AuthError
+
+     ## Authentication Flow
+     1. User enters phone number
+     2. App calls this method to send verification code
+     3. Backend generates code and sends via Twilio
+     4. User receives SMS with code
+     5. User enters code in app
+     6. App calls `verifyPhoneCode()` to complete authentication
+
+     ## Example
+     ```swift
+     AuthService.shared.sendPhoneVerification(phoneNumber: "+14155551234") { result in
+         switch result {
+         case .success(let verificationId):
+             print("Code sent! Verification ID: \(verificationId)")
+             // Show code entry screen
+         case .failure(let error):
+             print("Error: \(error)")
+         }
+     }
+     ```
+
+     - Important: Phone number must be in E.164 format (+[country code][number])
+     - Note: This method communicates with your backend, which then uses Twilio API
+     */
+    func sendPhoneVerification(
+        phoneNumber: String,
+        completion: @escaping (Result<String, AuthError>) -> Void
+    ) {
+        // Validate phone number format
+        guard isValidPhoneNumber(phoneNumber) else {
+            completion(.failure(.invalidPhoneNumber))
+            return
+        }
+
+        // Create API request to backend
+        guard let url = URL(string: "https://your-backend-server.com/api/auth/send-verification") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = ["phoneNumber": phoneNumber]
+
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            completion(.failure(.authenticationFailed("Failed to encode request")))
+            return
+        }
+
+        // Make API call to backend
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(.authenticationFailed(error.localizedDescription)))
+                    return
+                }
+
+                guard let data = data,
+                      let json = try? JSONDecoder().decode([String: String].self, from: data),
+                      let verificationId = json["verificationId"] else {
+                    completion(.failure(.authenticationFailed("Invalid response")))
+                    return
+                }
+
+                // Store verification ID for later use
+                UserDefaults.standard.set(verificationId, forKey: "pendingVerificationId")
+                UserDefaults.standard.set(phoneNumber, forKey: "pendingPhoneNumber")
+
+                completion(.success(verificationId))
+            }
+        }.resume()
+
+        // Placeholder for development (comment out when backend is ready)
+        // DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        //     let mockVerificationId = UUID().uuidString
+        //     UserDefaults.standard.set(mockVerificationId, forKey: "pendingVerificationId")
+        //     UserDefaults.standard.set(phoneNumber, forKey: "pendingPhoneNumber")
+        //     completion(.success(mockVerificationId))
+        // }
+    }
+
+    /**
+     Verifies the SMS code and completes phone authentication.
+
+     Validates the verification code entered by the user and creates/signs in the user account.
+
+     - Parameters:
+       - code: 6-digit verification code from SMS
+       - completion: Completion handler with Result containing User or AuthError
+
+     ## Example
+     ```swift
+     AuthService.shared.verifyPhoneCode(code: "123456") { result in
+         switch result {
+         case .success(let user):
+             print("Phone verified! User: \(user.uid)")
+             // Navigate to main app
+         case .failure(let error):
+             print("Invalid code: \(error)")
+         }
+     }
+     ```
+
+     - Important: Must be called after `sendPhoneVerification()`
+     - Note: Code expires after 10 minutes
+     */
+    func verifyPhoneCode(
+        code: String,
+        completion: @escaping (Result<User, AuthError>) -> Void
+    ) {
+        // Get pending verification details
+        guard let verificationId = UserDefaults.standard.string(forKey: "pendingVerificationId"),
+              let phoneNumber = UserDefaults.standard.string(forKey: "pendingPhoneNumber") else {
+            completion(.failure(.authenticationFailed("No pending verification")))
+            return
+        }
+
+        // Validate code format (6 digits)
+        guard code.count == 6, code.allSatisfy({ $0.isNumber }) else {
+            completion(.failure(.invalidVerificationCode))
+            return
+        }
+
+        // Create API request to backend
+        guard let url = URL(string: "https://your-backend-server.com/api/auth/verify-phone") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body = [
+            "verificationId": verificationId,
+            "code": code,
+            "phoneNumber": phoneNumber
+        ]
+
+        do {
+            request.httpBody = try JSONEncoder().encode(body)
+        } catch {
+            completion(.failure(.authenticationFailed("Failed to encode request")))
+            return
+        }
+
+        // Make API call to backend
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(.authenticationFailed(error.localizedDescription)))
+                    return
+                }
+
+                guard let data = data,
+                      let json = try? JSONDecoder().decode([String: String].self, from: data),
+                      let token = json["token"],
+                      let userId = json["userId"] else {
+                    completion(.failure(.invalidVerificationCode))
+                    return
+                }
+
+                // Clear pending verification
+                UserDefaults.standard.removeObject(forKey: "pendingVerificationId")
+                UserDefaults.standard.removeObject(forKey: "pendingPhoneNumber")
+
+                // Save token and user info
+                self?.saveToken(token)
+                self?.saveUserId(userId)
+
+                let user = User(
+                    uid: userId,
+                    email: nil,
+                    displayName: nil,
+                    phoneNumber: phoneNumber
+                )
+
+                completion(.success(user))
+            }
+        }.resume()
+
+        // Placeholder for development (comment out when backend is ready)
+        // DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        //     // Mock successful verification
+        //     UserDefaults.standard.removeObject(forKey: "pendingVerificationId")
+        //     UserDefaults.standard.removeObject(forKey: "pendingPhoneNumber")
+        //
+        //     let mockUser = User(
+        //         uid: "phone_user_\(UUID().uuidString)",
+        //         email: nil,
+        //         displayName: nil,
+        //         phoneNumber: phoneNumber
+        //     )
+        //     self.saveToken("mock_phone_token_\(UUID().uuidString)")
+        //     self.saveUserId(mockUser.uid)
+        //     completion(.success(mockUser))
+        // }
+    }
+
+    /**
+     Validates phone number format.
+
+     Checks if phone number is in E.164 format (+[country code][number]).
+
+     - Parameter phoneNumber: Phone number to validate
+     - Returns: true if valid E.164 format, false otherwise
+
+     ## Valid Examples
+     - +14155551234 (US)
+     - +442071234567 (UK)
+     - +33612345678 (France)
+     */
+    private func isValidPhoneNumber(_ phoneNumber: String) -> Bool {
+        let pattern = "^\\+[1-9]\\d{1,14}$"
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: phoneNumber.utf16.count)
+        return regex?.firstMatch(in: phoneNumber, range: range) != nil
+    }
+
     /**
      Signs out the current user.
 
@@ -414,56 +649,56 @@ class AuthService {
     // MARK: - Token Management
 
     /**
-     Saves the Firebase ID token to UserDefaults.
+     Saves the Firebase ID token securely to Keychain.
 
      - Parameter token: The Firebase ID token to save
 
-     - Note: In production, tokens should be stored in Keychain for better security
+     - Note: Uses Keychain for secure, persistent storage (better than cookies or UserDefaults).
+             Tokens persist between app launches, keeping users logged in.
      */
     private func saveToken(_ token: String) {
-        // TODO: In production, use Keychain instead of UserDefaults
-        UserDefaults.standard.set(token, forKey: tokenKey)
+        KeychainHelper.shared.save(token, forKey: tokenKey)
     }
 
     /**
-     Retrieves the stored Firebase ID token.
+     Retrieves the stored Firebase ID token from Keychain.
 
      - Returns: The Firebase ID token if available, nil otherwise
      */
     private func getToken() -> String? {
-        return UserDefaults.standard.string(forKey: tokenKey)
+        return KeychainHelper.shared.get(forKey: tokenKey)
     }
 
     /**
-     Clears the stored Firebase ID token.
+     Clears the stored Firebase ID token from Keychain.
      */
     private func clearToken() {
-        UserDefaults.standard.removeObject(forKey: tokenKey)
+        KeychainHelper.shared.delete(forKey: tokenKey)
     }
 
     /**
-     Saves the user ID to UserDefaults.
+     Saves the user ID securely to Keychain.
 
      - Parameter userId: The user ID to save
      */
     private func saveUserId(_ userId: String) {
-        UserDefaults.standard.set(userId, forKey: userIdKey)
+        KeychainHelper.shared.save(userId, forKey: userIdKey)
     }
 
     /**
-     Retrieves the stored user ID.
+     Retrieves the stored user ID from Keychain.
 
      - Returns: The user ID if available, nil otherwise
      */
     private func getUserId() -> String? {
-        return UserDefaults.standard.string(forKey: userIdKey)
+        return KeychainHelper.shared.get(forKey: userIdKey)
     }
 
     /**
-     Clears the stored user ID.
+     Clears the stored user ID from Keychain.
      */
     private func clearUserId() {
-        UserDefaults.standard.removeObject(forKey: userIdKey)
+        KeychainHelper.shared.delete(forKey: userIdKey)
     }
 }
 
@@ -514,6 +749,15 @@ enum AuthError: LocalizedError {
     /// Invalid credentials provided
     case invalidCredentials
 
+    /// Invalid phone number format
+    case invalidPhoneNumber
+
+    /// Invalid verification code
+    case invalidVerificationCode
+
+    /// Invalid URL
+    case invalidURL
+
     /// Unknown error occurred
     case unknownError
 
@@ -534,6 +778,12 @@ enum AuthError: LocalizedError {
             return "Sign out failed: \(message)"
         case .invalidCredentials:
             return "Invalid email or password"
+        case .invalidPhoneNumber:
+            return "Invalid phone number. Please use E.164 format (e.g., +14155551234)"
+        case .invalidVerificationCode:
+            return "Invalid verification code. Please check and try again."
+        case .invalidURL:
+            return "Invalid API URL"
         case .unknownError:
             return "An unknown error occurred"
         }
