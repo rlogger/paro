@@ -33,12 +33,12 @@ POC: Simple 2-page mobile app with preset food ordering options based on cuisine
    ```
 
 2. **Set up Firebase**
-   - Follow the detailed guide in [`FIREBASE_SETUP.md`](FIREBASE_SETUP.md)
+   - Follow the detailed guide in [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md)
    - Download `GoogleService-Info.plist` from Firebase Console
    - Add it to the Xcode project
 
 3. **Configure server**
-   - See [`server-config.txt`](server-config.txt) for complete backend setup
+   - See [`docs/server-config.txt`](docs/server-config.txt) for complete backend setup
    - Set up Postmates API credentials
    - Deploy backend server
 
@@ -58,16 +58,20 @@ eaterr/
 ├── OrderService.swift          # API client for backend communication
 ├── AuthService.swift           # Firebase authentication service
 ├── Item.swift                  # Data models (Order, User, etc.)
-├── eaterApp.swift             # App entry point
-├── FIREBASE_SETUP.md          # Firebase setup guide
-├── SYSTEM_DESIGN.md           # System architecture documentation
-└── server-config.txt          # Server-side configuration reference
+├── eaterApp.swift              # App entry point
+├── ContentView.swift           # Root view controller
+├── Assets.xcassets/            # Image and color assets
+└── docs/
+    ├── SYSTEM_DESIGN.md        # System architecture documentation
+    ├── FIREBASE_SETUP.md       # Firebase setup guide
+    └── server-config.txt       # Server-side configuration reference
+```
 
 ## Documentation
 
-- **[System Design](SYSTEM_DESIGN.md)** - Complete system architecture, data flow, and technical specifications
-- **[Firebase Setup](FIREBASE_SETUP.md)** - Step-by-step Firebase integration guide
-- **[Server Configuration](server-config.txt)** - Backend API setup and credentials reference
+- **[System Design](docs/SYSTEM_DESIGN.md)** - Complete system architecture, data flow, and technical specifications
+- **[Firebase Setup](docs/FIREBASE_SETUP.md)** - Step-by-step Firebase integration guide
+- **[Server Configuration](docs/server-config.txt)** - Backend API setup and credentials reference
 
 <div align="center">
   <img src="img/screenshot_1.png" width="45%" />
