@@ -22,17 +22,29 @@ import SwiftUI
  - Two "Eater" texts at the bottom
 
  ## Navigation
- Tapping the carrot icon presents the CuisineSelectionView as a full-screen
- modal, allowing users to begin their food ordering journey.
+ Tapping the carrot icon checks authentication status:
+ - If not authenticated: Shows AuthenticationView
+ - If authenticated: Shows CuisineSelectionView
+
+ ## Authentication Flow
+ 1. User taps carrot icon
+ 2. Check if user is authenticated (via AuthService)
+ 3. If not authenticated, show login screen
+ 4. After successful login, proceed to cuisine selection
+ 5. If already authenticated, go directly to cuisine selection
 
  ## Accessibility
  The carrot button includes proper accessibility labels and hints to ensure
  the app is usable by all users, including those using assistive technologies.
 
  - Note: This view uses NavigationStack for proper navigation hierarchy.
+ - Important: Authentication is required before placing orders.
  */
 struct WelcomeView: View {
     // MARK: - State Properties
+
+    /// Controls whether to show the authentication view
+    @State private var showAuthentication = false
 
     /// Controls whether to show the cuisine selection view
     @State private var showCuisineSelection = false
@@ -56,6 +68,14 @@ struct WelcomeView: View {
                 bottomEaterGroup
             }
             .navigationBarHidden(true)
+            .fullScreenCover(isPresented: $showAuthentication) {
+                AuthenticationView { success in
+                    if success {
+                        // User successfully authenticated, show cuisine selection
+                        showCuisineSelection = true
+                    }
+                }
+            }
             .fullScreenCover(isPresented: $showCuisineSelection) {
                 CuisineSelectionView()
             }
@@ -134,16 +154,16 @@ struct WelcomeView: View {
      - Returns: A button with carrot icon
 
      ## Interaction
-     Tapping this button presents the CuisineSelectionView in a full-screen modal.
+     Tapping this button checks authentication:
+     - If authenticated: Shows CuisineSelectionView
+     - If not authenticated: Shows AuthenticationView first
 
      ## Accessibility
      - Label: "Start ordering"
      - Hint: "Tap to select cuisines and place an order"
      */
     private var carrotButton: some View {
-        Button(action: {
-            showCuisineSelection = true
-        }) {
+        Button(action: handleCarrotButtonTap) {
             Image(systemName: "carrot.fill")
                 .font(.system(size: 30))
                 .foregroundColor(.black)
@@ -151,6 +171,30 @@ struct WelcomeView: View {
         .buttonStyle(PlainButtonStyle())
         .accessibilityLabel("Start ordering")
         .accessibilityHint("Tap to select cuisines and place an order")
+    }
+
+    // MARK: - Actions
+
+    /**
+     Handles carrot button tap with authentication check.
+
+     Checks if user is authenticated:
+     - If yes: Proceeds to cuisine selection
+     - If no: Shows authentication screen first
+
+     This ensures users are logged in before they can place orders.
+     */
+    private func handleCarrotButtonTap() {
+        // Check if user is already authenticated
+        if AuthService.shared.isAuthenticated() {
+            // User is authenticated, go directly to cuisine selection
+            print("✅ User is authenticated, showing cuisine selection")
+            showCuisineSelection = true
+        } else {
+            // User is not authenticated, show login screen first
+            print("⚠️ User not authenticated, showing authentication screen")
+            showAuthentication = true
+        }
     }
 }
 

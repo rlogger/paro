@@ -649,56 +649,56 @@ class AuthService {
     // MARK: - Token Management
 
     /**
-     Saves the Firebase ID token to UserDefaults.
+     Saves the Firebase ID token securely to Keychain.
 
      - Parameter token: The Firebase ID token to save
 
-     - Note: In production, tokens should be stored in Keychain for better security
+     - Note: Uses Keychain for secure, persistent storage (better than cookies or UserDefaults).
+             Tokens persist between app launches, keeping users logged in.
      */
     private func saveToken(_ token: String) {
-        // TODO: In production, use Keychain instead of UserDefaults
-        UserDefaults.standard.set(token, forKey: tokenKey)
+        KeychainHelper.shared.save(token, forKey: tokenKey)
     }
 
     /**
-     Retrieves the stored Firebase ID token.
+     Retrieves the stored Firebase ID token from Keychain.
 
      - Returns: The Firebase ID token if available, nil otherwise
      */
     private func getToken() -> String? {
-        return UserDefaults.standard.string(forKey: tokenKey)
+        return KeychainHelper.shared.get(forKey: tokenKey)
     }
 
     /**
-     Clears the stored Firebase ID token.
+     Clears the stored Firebase ID token from Keychain.
      */
     private func clearToken() {
-        UserDefaults.standard.removeObject(forKey: tokenKey)
+        KeychainHelper.shared.delete(forKey: tokenKey)
     }
 
     /**
-     Saves the user ID to UserDefaults.
+     Saves the user ID securely to Keychain.
 
      - Parameter userId: The user ID to save
      */
     private func saveUserId(_ userId: String) {
-        UserDefaults.standard.set(userId, forKey: userIdKey)
+        KeychainHelper.shared.save(userId, forKey: userIdKey)
     }
 
     /**
-     Retrieves the stored user ID.
+     Retrieves the stored user ID from Keychain.
 
      - Returns: The user ID if available, nil otherwise
      */
     private func getUserId() -> String? {
-        return UserDefaults.standard.string(forKey: userIdKey)
+        return KeychainHelper.shared.get(forKey: userIdKey)
     }
 
     /**
-     Clears the stored user ID.
+     Clears the stored user ID from Keychain.
      */
     private func clearUserId() {
-        UserDefaults.standard.removeObject(forKey: userIdKey)
+        KeychainHelper.shared.delete(forKey: userIdKey)
     }
 }
 
