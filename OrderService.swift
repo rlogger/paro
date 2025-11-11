@@ -9,7 +9,24 @@ import Foundation
 
 // MARK: - API Error Types
 
-/// Errors that can occur during API operations
+/**
+ Errors that can occur during API operations.
+
+ This enum provides comprehensive error handling for all possible failure scenarios
+ when communicating with the backend API. Each case includes associated values
+ with additional context about the error.
+
+ - Note: Conforms to `LocalizedError` to provide user-friendly error messages.
+
+ ## Error Cases
+ - `networkError`: Network connection failed
+ - `invalidResponse`: Invalid response from server
+ - `serverError`: Server returned an error status code
+ - `decodingError`: Failed to decode the response
+ - `invalidURL`: Invalid URL
+ - `timeout`: Request timeout
+ - `unknown`: Unknown error occurred
+ */
 enum APIError: LocalizedError {
     /// Network connection failed
     case networkError(Error)
@@ -32,7 +49,14 @@ enum APIError: LocalizedError {
     /// Unknown error occurred
     case unknown
 
-    /// User-friendly error description
+    /**
+     User-friendly error description.
+
+     Provides a localized, human-readable description of the error suitable
+     for display to end users.
+
+     - Returns: A descriptive error message string
+     */
     var errorDescription: String? {
         switch self {
         case .networkError(let error):
@@ -55,7 +79,34 @@ enum APIError: LocalizedError {
 
 // MARK: - Order Service
 
-/// Service class for handling all order-related API operations
+/**
+ Service class for handling all order-related API operations.
+
+ `OrderService` provides a centralized interface for all backend API communication
+ related to food delivery orders. It handles network requests, error handling,
+ response parsing, and provides both callback-based and async/await APIs.
+
+ - Important: Uses the singleton pattern. Access via `OrderService.shared`.
+
+ ## Features
+ - Asynchronous order placement with completion handlers
+ - Modern async/await support (iOS 15+)
+ - Comprehensive error handling
+ - Configurable timeout intervals
+ - Mock data support for development
+
+ ## Usage Example
+ ```swift
+ OrderService.shared.placeOrder(cuisines: ["Thai", "Italian"]) { result in
+     switch result {
+     case .success(let order):
+         print("Order placed: \\(order.confirmationCode)")
+     case .failure(let error):
+         print("Error: \\(error.localizedDescription)")
+     }
+ }
+ ```
+ */
 class OrderService {
     // MARK: - Properties
 
@@ -73,7 +124,12 @@ class OrderService {
 
     // MARK: - Initialization
 
-    /// Private initializer for singleton pattern
+    /**
+     Private initializer for singleton pattern.
+
+     Configures the URL session with appropriate timeout settings and
+     network policies.
+     */
     private init() {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = timeoutInterval
@@ -83,12 +139,33 @@ class OrderService {
 
     // MARK: - Public Methods
 
-    /// Places an order with the selected cuisines
-    /// - Parameters:
-    ///   - cuisines: Array of selected cuisine types
-    ///   - deliveryAddress: Optional delivery address
-    ///   - specialInstructions: Optional special instructions
-    ///   - completion: Completion handler with Result containing Order or APIError
+    /**
+     Places an order with the selected cuisines.
+
+     Sends a POST request to the backend API to place a new food delivery order.
+     The method handles all aspects of the API call including request creation,
+     network execution, response parsing, and error handling.
+
+     - Parameters:
+       - cuisines: Array of selected cuisine types
+       - deliveryAddress: Optional delivery address
+       - specialInstructions: Optional special instructions
+       - completion: Completion handler with Result containing Order or APIError
+
+     - Note: The completion handler is always called on the main queue.
+     - Important: Currently uses mock data for development. Remove mock logic for production.
+
+     ## Example
+     ```swift
+     OrderService.shared.placeOrder(
+         cuisines: ["Thai", "Indian"],
+         deliveryAddress: "123 Main St",
+         specialInstructions: "Ring doorbell"
+     ) { result in
+         // Handle result
+     }
+     ```
+     */
     func placeOrder(
         cuisines: [String],
         deliveryAddress: String? = nil,
@@ -189,13 +266,35 @@ class OrderService {
         task.resume()
     }
 
-    /// Places an order asynchronously using async/await
-    /// - Parameters:
-    ///   - cuisines: Array of selected cuisine types
-    ///   - deliveryAddress: Optional delivery address
-    ///   - specialInstructions: Optional special instructions
-    /// - Returns: The created Order
-    /// - Throws: APIError if the request fails
+    /**
+     Places an order asynchronously using async/await.
+
+     Modern Swift concurrency API for placing orders. Provides a cleaner
+     syntax for asynchronous operations compared to callbacks.
+
+     - Parameters:
+       - cuisines: Array of selected cuisine types
+       - deliveryAddress: Optional delivery address
+       - specialInstructions: Optional special instructions
+
+     - Returns: The created Order
+
+     - Throws: APIError if the request fails
+
+     - Requires: iOS 15.0 or later
+
+     ## Example
+     ```swift
+     do {
+         let order = try await OrderService.shared.placeOrder(
+             cuisines: ["Thai", "Italian"]
+         )
+         print("Order placed: \\(order.confirmationCode)")
+     } catch {
+         print("Error: \\(error)")
+     }
+     ```
+     */
     @available(iOS 15.0, *)
     func placeOrder(
         cuisines: [String],
@@ -215,9 +314,18 @@ class OrderService {
 
     // MARK: - Private Helper Methods
 
-    /// Creates a mock order for development/testing purposes
-    /// - Parameter cuisines: Selected cuisines
-    /// - Returns: A mock Order object
+    /**
+     Creates a mock order for development/testing purposes.
+
+     Generates realistic order data based on the selected cuisines for
+     development and testing without requiring a backend API.
+
+     - Parameter cuisines: Selected cuisines
+
+     - Returns: A mock Order object with simulated data
+
+     - Important: This method should be removed in production builds.
+     */
     private func createMockOrder(cuisines: [String]) -> Order {
         var order = Order(cuisines: cuisines)
 
@@ -273,10 +381,17 @@ class OrderService {
         return order
     }
 
-    /// Cancels an active order
-    /// - Parameters:
-    ///   - orderId: The ID of the order to cancel
-    ///   - completion: Completion handler indicating success or failure
+    /**
+     Cancels an active order.
+
+     Sends a cancellation request to the backend API for the specified order.
+
+     - Parameters:
+       - orderId: The ID of the order to cancel
+       - completion: Completion handler indicating success or failure
+
+     - Note: This is a placeholder for future functionality.
+     */
     func cancelOrder(orderId: UUID, completion: @escaping (Result<Void, APIError>) -> Void) {
         // Implementation for order cancellation
         // This is a placeholder for future functionality
@@ -284,10 +399,17 @@ class OrderService {
         completion(.success(()))
     }
 
-    /// Fetches the current status of an order
-    /// - Parameters:
-    ///   - orderId: The ID of the order
-    ///   - completion: Completion handler with the order status
+    /**
+     Fetches the current status of an order.
+
+     Queries the backend API for the current status of a specific order.
+
+     - Parameters:
+       - orderId: The ID of the order
+       - completion: Completion handler with the order status
+
+     - Note: This is a placeholder for future functionality.
+     */
     func getOrderStatus(orderId: UUID, completion: @escaping (Result<OrderStatus, APIError>) -> Void) {
         // Implementation for fetching order status
         // This is a placeholder for future functionality
