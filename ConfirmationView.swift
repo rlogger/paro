@@ -7,7 +7,33 @@
 
 import SwiftUI
 
-/// View that displays order confirmation with all order details
+/**
+ View that displays order confirmation with all order details.
+
+ `ConfirmationView` presents a comprehensive summary of a successfully placed order.
+ It shows the confirmation code, order details, pricing information, and delivery
+ updates. Users can dismiss the view using the Done button to return to the main flow.
+
+ ## Displayed Information
+ - Confirmation code (6-digit)
+ - Delivery platform name
+ - Item name and customization
+ - Price breakdown (base price and total)
+ - Selected cuisines
+ - Order status
+ - Timestamp
+
+ ## Layout
+ The view uses responsive design with GeometryReader to adapt to different screen
+ sizes. Text sizes scale proportionally while maintaining readability.
+
+ - Important: Requires an Order object to be passed during initialization.
+
+ ## Usage Example
+ ```swift
+ ConfirmationView(order: completedOrder)
+ ```
+ */
 struct ConfirmationView: View {
     // MARK: - Properties
 
@@ -80,9 +106,24 @@ struct ConfirmationView: View {
 
     // MARK: - View Components
 
-    /// Creates the order details section
-    /// - Parameter geometry: Geometry proxy for responsive sizing
-    /// - Returns: A view containing order details
+    /**
+     Creates the order details section.
+
+     Displays all relevant order information including platform, item name,
+     customization options, pricing, and selected cuisines. Each field is
+     conditionally rendered based on availability.
+
+     - Parameter geometry: Geometry proxy for responsive sizing
+
+     - Returns: A view containing order details
+
+     ## Displayed Fields
+     - Platform name (e.g., "Uber Eats")
+     - Item name (e.g., "Pad Thai Noodles")
+     - Customization details (e.g., "Extra cheese")
+     - Base price
+     - Selected cuisines list
+     */
     private func orderDetailsSection(geometry: GeometryProxy) -> some View {
         VStack(alignment: .leading, spacing: geometry.size.height * 0.02) {
 
@@ -124,9 +165,19 @@ struct ConfirmationView: View {
         .padding(.horizontal, 20)
     }
 
-    /// Creates the done button to dismiss the view
-    /// - Parameter geometry: Geometry proxy for responsive sizing
-    /// - Returns: A configured done button
+    /**
+     Creates the done button to dismiss the view.
+
+     Generates a full-width button at the bottom of the screen that allows
+     users to return to the previous screen. The button has a black background
+     with white text for high visibility.
+
+     - Parameter geometry: Geometry proxy for responsive sizing
+
+     - Returns: A configured done button
+
+     - Note: Dismissing this view will return to the CuisineSelectionView.
+     */
     private func doneButton(geometry: GeometryProxy) -> some View {
         Button(action: {
             // Dismiss both the confirmation view and the cuisine selection view
@@ -145,9 +196,18 @@ struct ConfirmationView: View {
 
     // MARK: - Helper Methods
 
-    /// Formats a date into a readable string
-    /// - Parameter date: The date to format
-    /// - Returns: A formatted date string
+    /**
+     Formats a date into a readable string.
+
+     Converts a Date object into a user-friendly string representation
+     showing both the date and time in the user's locale.
+
+     - Parameter date: The date to format
+
+     - Returns: A formatted date string (e.g., "Jan 15, 2025 at 2:30 PM")
+
+     - Note: Uses medium date style and short time style.
+     */
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
