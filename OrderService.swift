@@ -114,7 +114,10 @@ class OrderService {
     static let shared = OrderService()
 
     /// Base URL for the API (replace with your actual API endpoint)
-    private let baseURL = "https://your-api-endpoint.com"
+    private let baseURL = "https://your-backend-server.com/api"
+
+    /// Postmates API base URL (for future direct integration if needed)
+    private let postmatesBaseURL = "https://api.postmates.com/v1"
 
     /// URL session configuration
     private let session: URLSession
@@ -187,6 +190,12 @@ class OrderService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("1.0", forHTTPHeaderField: "X-API-Version")
+
+        // Add Firebase authentication token if available
+        if let token = getAuthToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
 
         // Create request body
         let orderRequest = OrderRequest(
@@ -379,6 +388,90 @@ class OrderService {
 
         order.status = .submitted
         return order
+    }
+
+    /**
+     Retrieves the current Firebase authentication token.
+
+     Gets the stored Firebase ID token from UserDefaults (or Keychain in production).
+     This token is used to authenticate API requests with the backend.
+
+     - Returns: The Firebase ID token if available, nil otherwise
+
+     - Note: In production, tokens should be stored in Keychain for security
+     */
+    private func getAuthToken() -> String? {
+        // In production, retrieve from Keychain
+        // For now, using UserDefaults as placeholder
+        return UserDefaults.standard.string(forKey: "firebaseToken")
+    }
+
+    /**
+     Gets a delivery quote from Postmates.
+
+     Requests a delivery quote from the backend, which queries Postmates API
+     for pricing and estimated delivery time.
+
+     - Parameters:
+       - pickupAddress: Address where food will be picked up
+       - dropoffAddress: Address where food will be delivered
+       - completion: Completion handler with Result containing quote details or APIError
+
+     - Note: Requires authentication
+     */
+    func getDeliveryQuote(
+        pickupAddress: String,
+        dropoffAddress: String,
+        completion: @escaping (Result<DeliveryQuote, APIError>) -> Void
+    ) {
+        guard let url = URL(string: "\(baseURL)/delivery/quote") else {
+            completion(.failure(.invalidURL))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Add authentication
+        if let token = getAuthToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        let quoteRequest = DeliveryQuoteRequest(
+            pickupAddress: pickupAddress,
+            dropoffAddress: dropoffAddress
+        )
+
+        do {
+            request.httpBody = try JSONEncoder().encode(quoteRequest)
+        } catch {
+            completion(.failure(.decodingError(error)))
+            return
+        }
+
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(.networkError(error)))
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode),
+                  let data = data else {
+                completion(.failure(.invalidResponse))
+                return
+            }
+
+            do {
+                let quote = try JSONDecoder().decode(DeliveryQuote.self, from: data)
+                completion(.success(quote))
+            } catch {
+                completion(.failure(.decodingError(error)))
+            }
+        }
+
+        task.resume()
     }
 
     /**
