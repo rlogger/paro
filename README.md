@@ -16,6 +16,17 @@ POC: Simple 2-page mobile app with preset food ordering options based on cuisine
 - 📱 **Push Notifications:** Order status updates via Firebase Cloud Messaging
 - 💾 **Order History:** Persistent storage with SwiftData and Firestore
 
+## Screenshots
+
+<div align="center">
+  <img src="img/screenshot_1.png" width="45%" alt="Welcome Screen" />
+  <img src="img/screenshot_2.png" width="45%" alt="Cuisine Selection" />
+</div>
+
+<p align="center">
+  <em>Left: Welcome screen with signature "Eater" branding | Right: Cuisine selection interface</em>
+</p>
+
 ## Quick Start
 
 ### Prerequisites
@@ -73,23 +84,27 @@ eaterr/
 - **[Firebase Setup](docs/FIREBASE_SETUP.md)** - Step-by-step Firebase integration guide
 - **[Server Configuration](docs/server-config.txt)** - Backend API setup and credentials reference
 
-<div align="center">
-  <img src="img/screenshot_1.png" width="45%" />
-  <img src="img/screenshot_2.png" width="45%" />
-</div>
+## Delivery Platform Integrations
 
-<br>
-
-**Delivery Platform Integrations**
 - **Postmates** (Primary - Active Integration)
 - Uber Eats (Planned)
 - DoorDash (Planned)
 - Grubhub (Planned)
+- Weedmaps (Planned)
 
-**Technology Stack**
+## Technology Stack
+
 - **Frontend:** Swift, SwiftUI, SwiftData
 - **Backend:** Node.js (Planned), Express.js
 - **Authentication:** Firebase Auth
 - **Database:** Firestore
 - **Cloud Services:** Google Cloud Platform
-- **API Integration:** Postmates API v1
+- **Delivery APIs:** Postmates API v1 (Active), Uber Eats API (Planned), DoorDash API (Planned), Weedmaps API (Planned)
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
