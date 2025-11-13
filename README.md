@@ -7,16 +7,6 @@
 
 POC: Simple 2-page mobile app with preset food ordering options based on cuisine selection. Backend API integration with Postmates for real-time delivery quotes and order placement.
 
-## Features
-
-- 🎨 **Minimalist Design:** Clean 3-page interface (Welcome → Authentication → Cuisine Selection → Confirmation)
-- 🍜 **Cuisine-Based Ordering:** Select from preset cuisines (Thai, Italian, Indian, Fries, Panda, Water)
-- 🚚 **Postmates Integration:** Real-time delivery quotes and order placement
-- 🔐 **Firebase Authentication:** Secure email/password login with Keychain token persistence
-- 📱 **SMS Notifications:** Real-time order updates via Twilio SMS
-- 💾 **Order History:** Persistent storage with SwiftData and Firestore
-- 🔒 **Secure Storage:** Authentication tokens stored in iOS Keychain (not cookies)
-
 ## Screenshots
 
 <div align="center">
