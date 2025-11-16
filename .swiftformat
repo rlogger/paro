@@ -1,0 +1,33 @@
+# SwiftFormat configuration for Eater app
+
+# File options
+--exclude Tests,Pods,.build
+
+# Format options
+--indent 4
+--indentcase false
+--trimwhitespace always
+--commas always
+--semicolons inline
+--linebreaks lf
+--elseposition same-line
+--guardelse next-line
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--funcattributes prev-line
+--typeattributes prev-line
+--varattributes prev-line
+--modifierorder
+--stripunusedargs closure-only
+--header "//\n//  {file}\n//  eater\n//\n//  Created by Eater Team\n//"
+
+# Rules
+--enable isEmpty
+--enable sortedImports
+--enable redundantSelf
+--enable trailingCommas
+
+# Version
+--swiftversion 5.9
