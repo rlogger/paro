@@ -167,15 +167,23 @@ class AuthService {
         }
         */
 
-        // Placeholder implementation for development
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // DEMO MODE: Accept any email/password for demo purposes
+        // This allows the app to work without Firebase configuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // Create demo user with provided email
+            let displayName = email.components(separatedBy: "@").first?.capitalized ?? "Demo User"
             let mockUser = User(
-                uid: "mock_user_123",
+                uid: "demo_\(UUID().uuidString.prefix(8))",
                 email: email,
-                displayName: "Test User"
+                displayName: displayName,
+                phoneNumber: "+14155551234"
             )
-            self.saveToken("mock_firebase_token_\(UUID().uuidString)")
+
+            // Save demo token and user ID
+            self.saveToken("demo_token_\(UUID().uuidString)")
             self.saveUserId(mockUser.uid)
+
+            print("✅ DEMO MODE: Signed in as \(displayName)")
             completion(.success(mockUser))
         }
     }
@@ -254,15 +262,20 @@ class AuthService {
         }
         */
 
-        // Placeholder implementation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // DEMO MODE: Accept any sign up for demo purposes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             let mockUser = User(
-                uid: "new_user_\(UUID().uuidString)",
+                uid: "demo_\(UUID().uuidString.prefix(8))",
                 email: email,
-                displayName: displayName
+                displayName: displayName ?? "Demo User",
+                phoneNumber: "+14155551234"
             )
-            self.saveToken("mock_firebase_token_\(UUID().uuidString)")
+
+            // Save demo token and user ID
+            self.saveToken("demo_token_\(UUID().uuidString)")
             self.saveUserId(mockUser.uid)
+
+            print("✅ DEMO MODE: Created account for \(displayName ?? "Demo User")")
             completion(.success(mockUser))
         }
     }

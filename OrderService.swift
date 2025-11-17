@@ -265,12 +265,13 @@ class OrderService {
                     completion(.failure(.serverError(statusCode: httpResponse.statusCode, message: message)))
                 }
             } catch {
-                // For development/testing: create a mock successful order
-                // Remove this in production and uncomment the line below
+                // DEMO MODE: Always succeed with mock order
+                // This makes the app work without a backend server
+                print("✅ DEMO MODE: Using mock order (no real API)")
                 let mockOrder = self?.createMockOrder(cuisines: cuisines)
                 completion(.success(mockOrder!))
 
-                // In production, use this instead:
+                // For production with real backend, use:
                 // completion(.failure(.decodingError(error)))
             }
         }
@@ -341,7 +342,7 @@ class OrderService {
     private func createMockOrder(cuisines: [String]) -> Order {
         var order = Order(cuisines: cuisines)
 
-        // Simulate order details based on first cuisine selection
+        // DEMO MODE: Realistic order data for demonstrations
         let firstCuisine = cuisines.first ?? "Water"
 
         switch firstCuisine {
@@ -390,6 +391,7 @@ class OrderService {
         }
 
         order.status = .submitted
+        print("✅ DEMO MODE: Created order for \(firstCuisine) - \(order.itemName ?? "Unknown")")
         return order
     }
 
