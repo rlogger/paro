@@ -58,7 +58,8 @@ let package = Package(
                 "OrderService.swift",
                 "NotificationService.swift",
                 "KeychainHelper.swift",
-                "Item.swift"
+                "Item.swift",
+                "DemoConfig.swift"
             ]
         ),
         .testTarget(
