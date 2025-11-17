@@ -99,7 +99,7 @@ struct ConfirmationView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .ignoresSafeArea()
         .background(Color.white)
     }

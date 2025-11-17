@@ -170,7 +170,7 @@ struct AuthenticationView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .ignoresSafeArea(.keyboard)
         .alert("Authentication Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
