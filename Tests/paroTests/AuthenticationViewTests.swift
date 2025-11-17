@@ -1,13 +1,13 @@
 //
 //  AuthenticationViewTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for AuthenticationView
 //
 
 import XCTest
 import SwiftUI
-@testable import eater
+@testable import paro
 
 /**
  Tests for AuthenticationView functionality.

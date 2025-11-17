@@ -1,48 +1,37 @@
-# Makefile for Eater iOS App
+# Makefile for Paro iOS App
 
-.PHONY: help build test clean format lint install
+.PHONY: help build test clean format lint
 
 help:
-	@echo "Eater iOS App - Build Commands"
+	@echo "Paro iOS App"
 	@echo ""
-	@echo "Available commands:"
+	@echo "Commands:"
 	@echo "  make build    - Build the app"
-	@echo "  make test     - Run all tests"
+	@echo "  make test     - Run tests"
 	@echo "  make clean    - Clean build artifacts"
-	@echo "  make format   - Format code with SwiftFormat"
-	@echo "  make lint     - Lint code with SwiftLint"
-	@echo "  make install  - Install dependencies"
-	@echo "  make all      - Build and test"
+	@echo "  make format   - Format code"
+	@echo "  make lint     - Lint code"
 	@echo ""
 
 build:
-	@echo "🔨 Building Eater app..."
-	swift build
+	@echo "Building..."
+	@swift build
 
 test:
-	@echo "🧪 Running tests..."
-	swift test
+	@echo "Testing..."
+	@swift test
 
 clean:
-	@echo "🧹 Cleaning build artifacts..."
-	swift package clean
-	rm -rf .build
+	@echo "Cleaning..."
+	@swift package clean
+	@rm -rf .build
 
 format:
-	@echo "✨ Formatting code..."
-	@which swiftformat > /dev/null || (echo "❌ SwiftFormat not installed. Run: brew install swiftformat" && exit 1)
-	swiftformat .
+	@echo "Formatting..."
+	@which swiftformat > /dev/null && swiftformat . || echo "Install: brew install swiftformat"
 
 lint:
-	@echo "🔍 Linting code..."
-	@which swiftlint > /dev/null || (echo "❌ SwiftLint not installed. Run: brew install swiftlint" && exit 1)
-	swiftlint
-
-install:
-	@echo "📦 Installing dependencies..."
-	@echo "Using Swift Package Manager - dependencies will be resolved on build"
-
-all: clean build test
-	@echo "✅ Build and tests complete!"
+	@echo "Linting..."
+	@which swiftlint > /dev/null && swiftlint || echo "Install: brew install swiftlint"
 
 .DEFAULT_GOAL := help

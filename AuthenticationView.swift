@@ -1,6 +1,6 @@
 //
 //  AuthenticationView.swift
-//  eater
+//  paro
 //
 //  Authentication screen for email/password login
 //

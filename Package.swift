@@ -1,42 +1,32 @@
 // swift-tools-version: 5.9
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "eater",
+    name: "paro",
     defaultLocalization: "en",
     platforms: [
         .iOS(.v17)
     ],
     products: [
         .library(
-            name: "eater",
-            targets: ["eater"]),
-    ],
-    dependencies: [
-        // Add Firebase dependencies when ready
-        // .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "10.0.0"),
+            name: "paro",
+            targets: ["paro"]),
     ],
     targets: [
         .target(
-            name: "eater",
-            dependencies: [
-                // .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
-                // .product(name: "FirebaseFirestore", package: "firebase-ios-sdk"),
-            ],
+            name: "paro",
             path: ".",
             exclude: [
                 "Assets.xcassets",
                 "docs",
                 "img",
                 "Tests",
+                ".git",
+                ".github",
                 "README.md",
                 "LICENSE",
                 "CONTRIBUTING.md",
-                "DEPLOYMENT.md",
-                "TESTING.md",
-                "XCODE_FIX.md",
                 ".gitignore",
                 ".gitattributes",
                 ".swiftlint.yml",
@@ -44,11 +34,11 @@ let package = Package(
                 "Info.plist",
                 "Makefile",
                 "Package.swift",
-                "eater.xcconfig",
+                "paro.xcconfig",
                 "project.yml"
             ],
             sources: [
-                "eaterApp.swift",
+                "ParoApp.swift",
                 "ContentView.swift",
                 "WelcomeView.swift",
                 "AuthenticationView.swift",
@@ -63,9 +53,9 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "eaterTests",
-            dependencies: ["eater"],
-            path: "Tests/eaterTests"
+            name: "paroTests",
+            dependencies: ["paro"],
+            path: "Tests/paroTests"
         ),
     ]
 )

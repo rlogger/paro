@@ -1,6 +1,6 @@
 //
 //  AuthService.swift
-//  eater
+//  paro
 //
 //  Firebase authentication service for user management
 //

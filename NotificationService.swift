@@ -1,6 +1,6 @@
 //
 //  NotificationService.swift
-//  eater
+//  paro
 //
 //  Real-time SMS notifications via Twilio API
 //
@@ -112,7 +112,7 @@ class NotificationService {
         completion: @escaping (Result<Void, NotificationError>) -> Void
     ) {
         let message = """
-        🥕 Eater Order Confirmed!
+        🥕 Paro Order Confirmed!
 
         Order #\(order.confirmationCode)
         Platform: \(order.platform ?? "Unknown")
@@ -196,7 +196,7 @@ class NotificationService {
         completion: @escaping (Result<Void, NotificationError>) -> Void
     ) {
         let message = """
-        Your Eater verification code is: \(code)
+        Your Paro verification code is: \(code)
 
         This code will expire in 10 minutes.
         Do not share this code with anyone.

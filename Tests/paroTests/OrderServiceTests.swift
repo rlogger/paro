@@ -1,12 +1,12 @@
 //
 //  OrderServiceTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for OrderService
 //
 
 import XCTest
-@testable import eater
+@testable import paro
 
 /**
  Tests for OrderService functionality.

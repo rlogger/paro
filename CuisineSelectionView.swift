@@ -1,6 +1,6 @@
 //
 //  CuisineSelectionView.swift
-//  eater
+//  paro
 //
 //  View for selecting cuisine types and placing orders
 //

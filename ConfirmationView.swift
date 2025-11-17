@@ -1,6 +1,6 @@
 //
 //  ConfirmationView.swift
-//  eater
+//  paro
 //
 //  View displaying order confirmation details
 //

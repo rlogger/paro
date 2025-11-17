@@ -1,13 +1,13 @@
 //
 //  ConfirmationViewTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for ConfirmationView
 //
 
 import XCTest
 import SwiftUI
-@testable import eater
+@testable import paro
 
 /**
  Tests for ConfirmationView functionality.
@@ -80,7 +80,7 @@ final class ConfirmationViewTests: XCTestCase {
         XCTAssertNotNil(sampleOrder.totalPrice, "Order should have total price")
 
         if let price = sampleOrder.price, let total = sampleOrder.totalPrice {
-            XCTAssertGreaterThan(total, price, "Total price should be greater than base price (includes fees)")
+            XCTAssertGrparoThan(total, price, "Total price should be grparo than base price (includes fees)")
         }
     }
 

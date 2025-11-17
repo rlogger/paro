@@ -1,13 +1,13 @@
 //
 //  WelcomeViewTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for WelcomeView
 //
 
 import XCTest
 import SwiftUI
-@testable import eater
+@testable import paro
 
 /**
  Tests for WelcomeView functionality.

@@ -1,6 +1,6 @@
 //
 //  KeychainHelper.swift
-//  eater
+//  paro
 //
 //  Secure storage for authentication tokens using iOS Keychain
 //
@@ -48,7 +48,7 @@ class KeychainHelper {
     static let shared = KeychainHelper()
 
     /// Service identifier for keychain items
-    private let service = "com.eater.app"
+    private let service = "com.paro.app"
 
     // MARK: - Initialization
 

@@ -1,101 +1,137 @@
-## design: removes pâro when ordering food delivery
-**pâro** n. the feeling that everything you do is always somehow wrong
+# Paro
 
-<br>
+> Food delivery without the pâro
 
-**Status:** Active Development - Postmates API Integration + Firebase Authentication
+A minimalist iOS demo app for ordering food delivery. Works completely offline with realistic mock data.
 
-POC: Simple 2-page mobile app with preset food ordering options based on cuisine selection. Backend API integration with Postmates for real-time delivery quotes and order placement.
+## Features
 
-## Screenshots
+- Clean SwiftUI interface
+- Offline-first architecture
+- Instant order placement
+- Secure Keychain storage
 
-<div align="center">
-  <img src="img/screenshot_1.png" width="45%" alt="Welcome Screen" />
-  <img src="img/screenshot_2.png" width="45%" alt="Cuisine Selection" />
-</div>
+## Getting Started
 
-<p align="center">
-  <em>Left: Welcome screen with signature "Eater" branding | Right: Cuisine selection interface</em>
-</p>
+### Requirements
 
-## Quick Start
+- macOS with Xcode 15+
+- iPhone running iOS 17+
+- USB cable
 
-### Prerequisites
-- Xcode 15.0+
-- iOS 17.0+
-- Firebase account
-- Postmates API credentials
-
-### Setup
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/rlogger/eaterr.git
-   cd eaterr
+   git clone https://github.com/rlogger/paro.git
+   cd paro
    ```
 
-2. **Set up Firebase**
-   - Follow the detailed guide in [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md)
-   - Download `GoogleService-Info.plist` from Firebase Console
-   - Add it to the Xcode project
+2. **Open in Xcode**
+   - File → New → Project → iOS App
+   - Name: `paro`
+   - Drag all .swift files into project
+   - Add Assets.xcassets folder
 
-3. **Configure server**
-   - See [`docs/server-config.txt`](docs/server-config.txt) for complete backend setup
-   - Set up Postmates API credentials
-   - Deploy backend server
+3. **Connect iPhone**
+   - Enable Developer Mode: Settings → Privacy & Security → Developer Mode
+   - Connect via USB and trust computer
 
-4. **Build and run**
-   ```bash
-   open eater.xcodeproj  # Or eater.xcworkspace if using CocoaPods
-   # Build and run in Xcode
-   ```
+4. **Build and Run**
+   - In Xcode: Cmd + R
 
-## Project Structure
+### First Run
+
+On first launch:
+1. Settings → General → VPN & Device Management
+2. Trust your Apple ID developer certificate
+3. Relaunch app
+
+## Demo Mode
+
+The app runs in demo mode with no backend required.
+
+### Authentication
+- Any email/password works
+- Try: `demo@paro.app` / `demo`
+
+### Order Flow
+1. Tap carrot icon
+2. Sign in with any credentials
+3. Select cuisines
+4. Place order
+5. View confirmation
+
+## Architecture
 
 ```
-eaterr/
-├── WelcomeView.swift           # Landing screen with app branding
-├── CuisineSelectionView.swift  # Cuisine selection and order placement
-├── ConfirmationView.swift      # Order confirmation display
-├── OrderService.swift          # API client for backend communication
-├── AuthService.swift           # Firebase authentication service
-├── Item.swift                  # Data models (Order, User, etc.)
-├── eaterApp.swift              # App entry point
-├── ContentView.swift           # Root view controller
-├── Assets.xcassets/            # Image and color assets
-└── docs/
-    ├── SYSTEM_DESIGN.md        # System architecture documentation
-    ├── FIREBASE_SETUP.md       # Firebase setup guide
-    └── server-config.txt       # Server-side configuration reference
+paro/
+├── ParoApp.swift           # App entry point
+├── ContentView.swift       # Root view
+├── WelcomeView.swift       # Landing screen
+├── AuthenticationView.swift # Sign in/up
+├── CuisineSelectionView.swift # Order screen
+├── ConfirmationView.swift  # Confirmation
+├── AuthService.swift       # Authentication
+├── OrderService.swift      # Order handling
+├── KeychainHelper.swift    # Secure storage
+├── DemoConfig.swift        # Demo settings
+└── Item.swift              # Data models
 ```
 
-## Documentation
+## Technology
 
-- **[System Design](docs/SYSTEM_DESIGN.md)** - Complete system architecture, data flow, and technical specifications
-- **[Firebase Setup](docs/FIREBASE_SETUP.md)** - Step-by-step Firebase integration guide
-- **[Server Configuration](docs/server-config.txt)** - Backend API setup and credentials reference
+- **SwiftUI** - Declarative UI framework
+- **SwiftData** - Data persistence
+- **Keychain** - Secure token storage
+- **Combine** - Reactive programming
 
-## Delivery Platform Integrations
+## Development
 
-- **Postmates** (Primary - Active Integration)
-- Uber Eats (Planned)
-- DoorDash (Planned)
-- Grubhub (Planned)
-- Weedmaps (Planned)
+### Build
+```bash
+swift build
+```
 
-## Technology Stack
+### Test
+```bash
+swift test
+```
 
-- **Frontend:** Swift, SwiftUI, SwiftData
-- **Backend:** Node.js (Planned), Express.js
-- **Authentication:** Firebase Auth
-- **Database:** Firestore
-- **Cloud Services:** Google Cloud Platform
-- **Delivery APIs:** Postmates API v1 (Active), Uber Eats API (Planned), DoorDash API (Planned), Weedmaps API (Planned)
+### Format
+```bash
+swiftformat .
+```
 
-## Contributing
+### Lint
+```bash
+swiftlint
+```
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+## Production Deployment
+
+To deploy with real backend:
+
+1. **Setup Firebase**
+   - Add GoogleService-Info.plist
+   - Uncomment Firebase code in AuthService
+
+2. **Configure Backend**
+   - Deploy API server
+   - Add Postmates/Twilio credentials
+
+3. **Update Services**
+   - Remove demo mode flags
+   - Enable real API calls
+
+4. **App Store**
+   - Add app icon
+   - Archive and upload
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - See LICENSE file
+
+## Contributing
+
+See CONTRIBUTING.md for development guidelines.

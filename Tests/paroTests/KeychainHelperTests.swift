@@ -1,12 +1,12 @@
 //
 //  KeychainHelperTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for KeychainHelper
 //
 
 import XCTest
-@testable import eater
+@testable import paro
 
 /**
  Tests for KeychainHelper functionality.

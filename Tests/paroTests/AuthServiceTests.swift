@@ -1,12 +1,12 @@
 //
 //  AuthServiceTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for AuthService
 //
 
 import XCTest
-@testable import eater
+@testable import paro
 
 /**
  Tests for AuthService functionality.

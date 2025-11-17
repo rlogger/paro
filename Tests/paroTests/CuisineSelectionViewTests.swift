@@ -1,13 +1,13 @@
 //
 //  CuisineSelectionViewTests.swift
-//  eaterTests
+//  paroTests
 //
 //  Unit tests for CuisineSelectionView
 //
 
 import XCTest
 import SwiftUI
-@testable import eater
+@testable import paro
 
 /**
  Tests for CuisineSelectionView functionality.

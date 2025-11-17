@@ -1,6 +1,6 @@
 //
 //  Item.swift
-//  eater
+//  paro
 //
 //  Created by rajdeep singh on 9/20/25.
 //

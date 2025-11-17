@@ -1,6 +1,6 @@
 //
 //  DemoConfig.swift
-//  eater
+//  paro
 //
 //  Demo mode configuration for the app
 //
@@ -18,13 +18,13 @@ struct DemoConfig {
     static let isDemoMode = true
 
     /// Demo user credentials (any email/password works)
-    static let demoEmail = "demo@eater.app"
+    static let demoEmail = "demo@paro.app"
     static let demoPassword = "demo123"
 
     /// Demo user information
     static let demoUser = User(
         uid: "demo_user_abc123",
-        email: "demo@eater.app",
+        email: "demo@paro.app",
         displayName: "Demo User",
         phoneNumber: "+14155551234"
     )
