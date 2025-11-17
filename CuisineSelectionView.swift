@@ -88,7 +88,7 @@ struct CuisineSelectionView: View {
                 }
             }
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .ignoresSafeArea()
         .alert("Order Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }

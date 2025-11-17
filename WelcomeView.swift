@@ -67,7 +67,7 @@ struct WelcomeView: View {
                 // MARK: - Bottom Eater Text Group
                 bottomEaterGroup
             }
-            .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
             .fullScreenCover(isPresented: $showAuthentication) {
                 AuthenticationView { success in
                     if success {

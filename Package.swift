@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "eater",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v17)
     ],
@@ -29,12 +30,22 @@ let package = Package(
                 "Assets.xcassets",
                 "docs",
                 "img",
+                "Tests",
                 "README.md",
                 "LICENSE",
                 "CONTRIBUTING.md",
+                "DEPLOYMENT.md",
+                "TESTING.md",
+                "XCODE_FIX.md",
                 ".gitignore",
+                ".gitattributes",
                 ".swiftlint.yml",
-                "Info.plist"
+                ".swiftformat",
+                "Info.plist",
+                "Makefile",
+                "Package.swift",
+                "eater.xcconfig",
+                "project.yml"
             ],
             sources: [
                 "eaterApp.swift",
@@ -53,7 +64,7 @@ let package = Package(
         .testTarget(
             name: "eaterTests",
             dependencies: ["eater"],
-            path: "Tests"
+            path: "Tests/eaterTests"
         ),
     ]
 )
