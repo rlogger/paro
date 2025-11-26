@@ -82,19 +82,18 @@ eaterr/
 ## Delivery Platform Integrations
 
 - **Postmates** (Primary - Active Integration)
-- Uber Eats (Planned)
-- DoorDash (Planned)
-- Grubhub (Planned)
-- Weedmaps (Planned)
+- Uber Eats (Considering)
+- Weedmaps (Considering)
+- Direct restaurant integrations (Considering)
 
 ## Technology Stack
 
 - **Frontend:** Swift, SwiftUI, SwiftData
-- **Backend:** Node.js (Planned), Express.js
+- **Backend:** Node.js, Express.js
 - **Authentication:** Firebase Auth
 - **Database:** Firestore
 - **Cloud Services:** Google Cloud Platform
-- **Delivery APIs:** Postmates API v1 (Active), Uber Eats API (Planned), DoorDash API (Planned), Weedmaps API (Planned)
+- **Delivery APIs:** Postmates API v1
 
 ## Contributing
 
