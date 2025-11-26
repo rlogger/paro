@@ -3,7 +3,7 @@
 
 <br>
 
-**Status:** Active Development - Postmates API Integration + Firebase Authentication
+**Status:** Inactive Development - See known limitations
 
 POC: Simple 2-page mobile app with preset food ordering options based on cuisine selection. Backend API integration with Postmates for real-time delivery quotes and order placement.
 
