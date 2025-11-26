@@ -1,570 +1,233 @@
 =================================================================
-EATER APP - SERVER-SIDE CONFIGURATION
-=================================================================
-Last Updated: 2025-11-11
-Environment: Production
-
-=================================================================
-1. POSTMATES API CONFIGURATION
+EATER APP - SERVER CONFIGURATION
 =================================================================
 
-API Endpoint: https://api.postmates.com/v1/
-API Version: v1
-Documentation: https://postmates.com/developer/docs/
-
---- Authentication ---
-Customer ID: [YOUR_POSTMATES_CUSTOMER_ID]
-API Key: [YOUR_POSTMATES_API_KEY]
-API Secret: [YOUR_POSTMATES_API_SECRET]
-Auth Type: Basic Authentication (API_KEY:)
-
---- API Endpoints ---
-Delivery Quote: POST /customers/{customer_id}/delivery_quotes
-Create Delivery: POST /customers/{customer_id}/deliveries
-List Deliveries: GET /customers/{customer_id}/deliveries
-Delivery Details: GET /customers/{customer_id}/deliveries/{delivery_id}
-Cancel Delivery: POST /customers/{customer_id}/deliveries/{delivery_id}/cancel
-Get Delivery Zones: GET /v1/delivery_zones
-
---- Rate Limits ---
-Requests per minute: 1000
-Burst limit: 5000
-
---- Webhook Configuration ---
-Webhook URL: https://your-backend-server.com/api/webhooks/postmates
-Webhook Events: delivery.status, delivery.updated, delivery.delivered, delivery.canceled
-Webhook Secret: [YOUR_WEBHOOK_SECRET]
-
 =================================================================
-2. FIREBASE CONFIGURATION
+1. POSTMATES API
 =================================================================
 
---- Firebase Project Details ---
-Project ID: eater-app-[UNIQUE_ID]
-Project Name: Eater
-Region: us-central1
+Endpoint: https://api.postmates.com/v1/
+Docs: https://postmates.com/developer/docs/
 
---- Firebase Authentication ---
-Enabled Providers:
-  - Email/Password: ENABLED
-  - Google Sign-In: ENABLED
-  - Apple Sign-In: ENABLED
-  - Phone Authentication: ENABLED
+Auth:
+  Customer ID: [YOUR_POSTMATES_CUSTOMER_ID]
+  API Key: [YOUR_POSTMATES_API_KEY]
+  Type: Basic Authentication (API_KEY:)
 
-Auth Domain: eater-app-[UNIQUE_ID].firebaseapp.com
+Endpoints:
+  POST /customers/{id}/delivery_quotes
+  POST /customers/{id}/deliveries
+  GET  /customers/{id}/deliveries/{delivery_id}
+  POST /customers/{id}/deliveries/{delivery_id}/cancel
 
---- iOS App Configuration ---
-Bundle ID: com.eater.app
-App ID: [YOUR_FIREBASE_IOS_APP_ID]
-GoogleService-Info.plist: [REQUIRED - Download from Firebase Console]
+Rate Limits: 1000 req/min, burst 5000
 
---- Firebase API Keys ---
-API Key (iOS): [YOUR_FIREBASE_IOS_API_KEY]
-Web API Key: [YOUR_FIREBASE_WEB_API_KEY]
-Server Key (FCM): [YOUR_FIREBASE_SERVER_KEY]
-
---- Firebase Database ---
-Firestore Database: ENABLED
-Database ID: (default)
-Location: us-central1
-Mode: Production
-
---- Firestore Collections Structure ---
-users/
-  {userId}/
-    - email: string
-    - displayName: string
-    - phoneNumber: string
-    - createdAt: timestamp
-    - lastLogin: timestamp
-    - preferences: map
-
-orders/
-  {orderId}/
-    - userId: string
-    - cuisines: array
-    - platform: string
-    - status: string
-    - itemName: string
-    - customization: string
-    - price: number
-    - totalPrice: number
-    - deliveryAddress: string
-    - postmatesDeliveryId: string
-    - confirmationCode: string
-    - createdAt: timestamp
-    - updatedAt: timestamp
-
-deliveryAddresses/
-  {userId}/
-    addresses/
-      {addressId}/
-        - address: string
-        - city: string
-        - state: string
-        - zipCode: string
-        - isDefault: boolean
-
---- Firebase Storage ---
-Storage Bucket: eater-app-[UNIQUE_ID].appspot.com
-Max Upload Size: 10MB
-
---- Firebase Cloud Messaging (FCM) ---
-FCM Sender ID: [YOUR_FCM_SENDER_ID]
-FCM Token: [GENERATED_PER_DEVICE]
-Purpose: Delivery status notifications
+Webhooks:
+  URL: https://your-backend.com/api/webhooks/postmates
+  Events: delivery.status, delivery.updated, delivery.delivered, delivery.canceled
+  Secret: [YOUR_WEBHOOK_SECRET]
 
 =================================================================
-3. TWILIO API CONFIGURATION (SMS Notifications)
+2. FIREBASE
 =================================================================
 
-API Endpoint: https://api.twilio.com/2010-04-01/
-Documentation: https://www.twilio.com/docs/sms
+Project:
+  ID: eater-app-[UNIQUE_ID]
+  Region: us-central1
 
---- Authentication ---
-Account SID: [YOUR_TWILIO_ACCOUNT_SID]
-Auth Token: [YOUR_TWILIO_AUTH_TOKEN]
-Auth Type: Basic Authentication (Account SID:Auth Token)
+Auth Providers:
+  - Email/Password
+  - Google Sign-In
+  - Apple Sign-In
+  - Phone Authentication
 
---- Phone Numbers ---
-Twilio Phone Number: +1[YOUR_TWILIO_NUMBER]
-  - Must be purchased from Twilio Console
-  - Used as "from" number for all SMS
-  - Supports SMS and MMS
+iOS Config:
+  Bundle ID: com.eater.app
+  GoogleService-Info.plist: [Download from console]
 
---- API Endpoints ---
-Send SMS: POST /Accounts/{AccountSid}/Messages.json
-Get Message: GET /Accounts/{AccountSid}/Messages/{MessageSid}.json
-List Messages: GET /Accounts/{AccountSid}/Messages.json
-
---- Rate Limits ---
-Default: 100 requests per second
-Can be increased by contacting Twilio support
-
---- Messaging Configuration ---
-Message Length: Up to 1600 characters (billed as segments)
-  - 1-160 characters = 1 segment
-  - 161-306 characters = 2 segments
-  - 307-459 characters = 3 segments
-
-Character Encoding: UTF-8 (supports emojis)
-
---- SMS Use Cases in Eater App ---
-1. Authentication:
-   - Phone number verification codes
-   - Two-factor authentication
-   - Account recovery
-
-2. Order Notifications:
-   - Order confirmation
-   - Order status updates (preparing, out for delivery)
-   - Courier arrival alerts
-   - Delivery completion
-
-3. Real-time Updates:
-   - Push notifications via SMS as fallback
-   - Time-sensitive delivery updates
-
---- SMS Templates ---
-
-Order Confirmation:
-"""
-🥕 Eater Order Confirmed!
-
-Order #[CONFIRMATION_CODE]
-Platform: [PLATFORM_NAME]
-Item: [ITEM_NAME]
-Total: $[TOTAL_PRICE]
-
-Track your order in the app!
-"""
-
-Status Update - Preparing:
-"""
-🍳 Your order #[ORDER_ID] is being prepared!
-"""
-
-Status Update - Out for Delivery:
-"""
-🚗 Your order #[ORDER_ID] is out for delivery! Your food will arrive soon.
-"""
-
-Status Update - Delivered:
-"""
-✅ Your order #[ORDER_ID] has been delivered! Enjoy your meal!
-"""
-
-Verification Code:
-"""
-Your Eater verification code is: [CODE]
-
-This code will expire in 10 minutes.
-Do not share this code with anyone.
-"""
-
-Courier Nearby:
-"""
-🚨 Your delivery is almost here! Order #[ORDER_ID] will arrive in approximately [MINUTES] minute(s).
-"""
-
---- Twilio Webhook Configuration ---
-Webhook URL: https://your-backend-server.com/api/webhooks/twilio
-Webhook Events:
-  - message.status.delivered
-  - message.status.failed
-  - message.status.sent
-
-Webhook Method: POST
-Webhook Format: application/x-www-form-urlencoded
-
---- Error Handling ---
-Error Codes to Handle:
-  - 21211: Invalid phone number
-  - 21408: Permission to send not enabled (phone number not verified)
-  - 21610: Message blocked (unsubscribed recipient)
-  - 30003: Unreachable destination number
-  - 30005: Unknown destination number
-  - 30006: Landline or unreachable carrier
-
---- Cost Optimization ---
-- Use message templates to reduce errors
-- Implement opt-out management
-- Track delivery status to avoid duplicate sends
-- Use Twilio Verify API for phone verification (costs less)
-
---- Security Best Practices ---
-1. Store credentials in environment variables
-2. Use HTTPS for all webhook endpoints
-3. Validate webhook signatures
-4. Implement rate limiting
-5. Never expose Auth Token in client-side code
-
---- Twilio Verify API (Recommended for Phone Auth) ---
-Alternative to sending manual verification codes:
-
-Send Verification:
-POST /Services/{ServiceSid}/Verifications
-Body: { "To": "+14155551234", "Channel": "sms" }
-
-Verify Code:
-POST /Services/{ServiceSid}/VerificationCheck
-Body: { "To": "+14155551234", "Code": "123456" }
-
-Benefits:
-- Automatic code generation
-- Built-in rate limiting
-- Fraud detection
-- Lower cost than standard SMS
-- Automatic retry logic
-
-Service SID: [YOUR_TWILIO_VERIFY_SERVICE_SID]
+Firestore Collections:
+  users/{userId}
+  orders/{orderId}
+  deliveryAddresses/{userId}/addresses/{addressId}
 
 =================================================================
-4. BACKEND SERVER CONFIGURATION
+3. TWILIO (SMS)
 =================================================================
 
---- Server Details ---
-Platform: Node.js (Recommended) / Python / Go
-Framework: Express.js / FastAPI / Gin
+Endpoint: https://api.twilio.com/2010-04-01/
+Docs: https://www.twilio.com/docs/sms
+
+Auth:
+  Account SID: [YOUR_TWILIO_ACCOUNT_SID]
+  Auth Token: [YOUR_TWILIO_AUTH_TOKEN]
+
+Phone: +1[YOUR_TWILIO_NUMBER]
+
+Use Cases:
+  - Phone verification codes
+  - Order confirmations
+  - Status updates
+  - Courier arrival alerts
+
+Rate Limit: 100 req/sec
+
+=================================================================
+4. BACKEND SERVER
+=================================================================
+
+Stack: Node.js + Express.js
 Hosting: Google Cloud Run / AWS Lambda / Vercel
-Base URL: https://your-backend-server.com
+Base URL: https://your-backend.com
 
---- Environment Variables (.env) ---
-NODE_ENV=production
-PORT=8080
+Environment Variables:
+  NODE_ENV=production
+  PORT=8080
 
-# Postmates
-POSTMATES_CUSTOMER_ID=[YOUR_POSTMATES_CUSTOMER_ID]
-POSTMATES_API_KEY=[YOUR_POSTMATES_API_KEY]
-POSTMATES_API_SECRET=[YOUR_POSTMATES_API_SECRET]
-POSTMATES_WEBHOOK_SECRET=[YOUR_WEBHOOK_SECRET]
+  # Postmates
+  POSTMATES_CUSTOMER_ID=[YOUR_ID]
+  POSTMATES_API_KEY=[YOUR_KEY]
+  POSTMATES_WEBHOOK_SECRET=[YOUR_SECRET]
 
-# Firebase
-FIREBASE_PROJECT_ID=eater-app-[UNIQUE_ID]
-FIREBASE_PRIVATE_KEY=[YOUR_FIREBASE_ADMIN_SDK_PRIVATE_KEY]
-FIREBASE_CLIENT_EMAIL=[YOUR_FIREBASE_SERVICE_ACCOUNT_EMAIL]
-FIREBASE_DATABASE_URL=https://eater-app-[UNIQUE_ID].firebaseio.com
+  # Firebase
+  FIREBASE_PROJECT_ID=eater-app-[ID]
+  FIREBASE_PRIVATE_KEY=[YOUR_KEY]
+  FIREBASE_CLIENT_EMAIL=[YOUR_EMAIL]
 
-# Twilio
-TWILIO_ACCOUNT_SID=[YOUR_TWILIO_ACCOUNT_SID]
-TWILIO_AUTH_TOKEN=[YOUR_TWILIO_AUTH_TOKEN]
-TWILIO_PHONE_NUMBER=+1[YOUR_TWILIO_NUMBER]
-TWILIO_VERIFY_SERVICE_SID=[YOUR_TWILIO_VERIFY_SERVICE_SID]
-
-# Security
-JWT_SECRET=[YOUR_JWT_SECRET_KEY]
-ENCRYPTION_KEY=[YOUR_ENCRYPTION_KEY]
-ALLOWED_ORIGINS=https://eater-app.com,http://localhost:3000
-
-# Other APIs (Future Integration)
-UBER_EATS_API_KEY=[YOUR_UBER_EATS_KEY]
-DOORDASH_API_KEY=[YOUR_DOORDASH_KEY]
+  # Twilio
+  TWILIO_ACCOUNT_SID=[YOUR_SID]
+  TWILIO_AUTH_TOKEN=[YOUR_TOKEN]
+  TWILIO_PHONE_NUMBER=+1[YOUR_NUMBER]
 
 =================================================================
-4. API ENDPOINTS (Backend Server)
+5. API ENDPOINTS
 =================================================================
 
---- Authentication Endpoints ---
-POST   /api/auth/register                 - Register new user
-POST   /api/auth/login                    - Login user
-POST   /api/auth/logout                   - Logout user
-POST   /api/auth/refresh-token            - Refresh JWT token
-POST   /api/auth/send-verification        - Send SMS verification code (Twilio)
-POST   /api/auth/verify-phone             - Verify phone number with SMS code
-GET    /api/auth/user                     - Get current user profile
+Auth:
+  POST   /api/auth/register
+  POST   /api/auth/login
+  POST   /api/auth/verify-phone
+  GET    /api/auth/user
 
---- Order Endpoints ---
-POST   /api/orders                 - Create new order
-GET    /api/orders                 - List user orders
-GET    /api/orders/:id             - Get order details
-PATCH  /api/orders/:id             - Update order
-DELETE /api/orders/:id             - Cancel order
-GET    /api/orders/:id/status      - Get order delivery status
+Orders:
+  POST   /api/orders
+  GET    /api/orders
+  GET    /api/orders/:id
+  DELETE /api/orders/:id
 
---- Delivery Endpoints ---
-POST   /api/delivery/quote         - Get delivery quote from Postmates
-POST   /api/delivery/create        - Create Postmates delivery
-GET    /api/delivery/:id           - Get delivery details
-POST   /api/delivery/:id/cancel    - Cancel delivery
+Delivery:
+  POST   /api/delivery/quote
+  POST   /api/delivery/create
+  GET    /api/delivery/:id
 
---- Notification Endpoints (Twilio SMS) ---
-POST   /api/notifications/sms               - Send SMS notification
-POST   /api/notifications/order-confirmation - Send order confirmation SMS
-POST   /api/notifications/status-update     - Send order status update SMS
-POST   /api/notifications/courier-alert     - Send courier arrival alert
-
---- Webhook Endpoints ---
-POST   /api/webhooks/postmates     - Postmates webhook handler
-POST   /api/webhooks/firebase      - Firebase webhook handler
-POST   /api/webhooks/twilio        - Twilio SMS status webhook handler
-
---- User Endpoints ---
-GET    /api/users/profile          - Get user profile
-PATCH  /api/users/profile          - Update user profile
-GET    /api/users/addresses        - Get saved addresses
-POST   /api/users/addresses        - Add new address
-PATCH  /api/users/addresses/:id    - Update address
-DELETE /api/users/addresses/:id    - Delete address
+Webhooks:
+  POST   /api/webhooks/postmates
+  POST   /api/webhooks/twilio
 
 =================================================================
-5. SECURITY CONFIGURATION
+6. FIRESTORE SECURITY RULES
 =================================================================
 
---- Firebase Security Rules (Firestore) ---
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read/write their own data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Users can only read/write their own orders
     match /orders/{orderId} {
-      allow read: if request.auth != null &&
-                     resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null;
-      allow update: if request.auth != null &&
-                       resource.data.userId == request.auth.uid;
-    }
-
-    // Users can only access their own addresses
-    match /deliveryAddresses/{userId}/{document=**} {
-      allow read, write: if request.auth != null &&
-                            request.auth.uid == userId;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }
 
---- API Authentication Flow ---
-1. User signs in via Firebase Authentication
-2. Firebase returns ID token
-3. App sends ID token with each API request in Authorization header
-4. Backend verifies token with Firebase Admin SDK
-5. Backend processes request and returns response
-
---- Request Headers ---
-Authorization: Bearer [FIREBASE_ID_TOKEN]
-Content-Type: application/json
-X-API-Version: 1.0
-
 =================================================================
-6. POSTMATES DELIVERY FLOW
+7. POSTMATES DELIVERY FLOW
 =================================================================
 
-Step 1: User Authentication
-  - User signs in with Firebase (Email/Phone/Google/Apple)
-  - Firebase generates and returns ID token
-  - App stores token securely in Keychain
+1. User Authentication
+   → Firebase generates ID token
+   → App stores in Keychain
 
-Step 2: Order Creation
-  - User selects cuisines in app
-  - App sends order request to backend with Firebase token
-  - Backend verifies token and authenticates user
+2. Order Creation
+   → User selects cuisines
+   → Backend verifies token
 
-Step 3: Delivery Quote
-  - Backend calls Postmates API to get delivery quote
-  - Postmates returns quote with estimated time and cost
-  - Backend returns quote to app for user confirmation
+3. Delivery Quote
+   → Backend calls Postmates API
+   → Returns quote with cost and ETA
 
-Step 4: Order Placement
-  - User confirms order
-  - Backend creates Postmates delivery request
-  - Postmates assigns courier and returns delivery ID
-  - Backend saves order to Firestore with Postmates delivery ID
+4. Order Placement
+   → User confirms
+   → Backend creates Postmates delivery
+   → Saves to Firestore
 
-Step 5: Order Tracking
-  - Backend receives webhook updates from Postmates
-  - Backend updates order status in Firestore
-  - Firebase triggers push notification to user via FCM
-  - App displays real-time delivery status
+5. Order Tracking
+   → Postmates sends webhooks
+   → Backend updates Firestore
+   → Push notification to user
 
-Step 6: Order Completion
-  - Postmates marks delivery as completed
-  - Backend updates final status in Firestore
-  - User receives completion notification
+6. Completion
+   → Postmates marks delivered
+   → Final status update
 
 =================================================================
-7. POSTMATES API REQUEST EXAMPLES
+8. POSTMATES API EXAMPLES
 =================================================================
 
---- Get Delivery Quote ---
-curl -X POST https://api.postmates.com/v1/customers/{customer_id}/delivery_quotes \
+Get Quote:
+curl -X POST https://api.postmates.com/v1/customers/{id}/delivery_quotes \
   -u "{api_key}:" \
   -d "pickup_address=20 McAllister St, San Francisco, CA" \
   -d "dropoff_address=101 Market St, San Francisco, CA"
 
---- Create Delivery ---
-curl -X POST https://api.postmates.com/v1/customers/{customer_id}/deliveries \
+Create Delivery:
+curl -X POST https://api.postmates.com/v1/customers/{id}/deliveries \
   -u "{api_key}:" \
-  -d "pickup_name=Eater Restaurant" \
+  -d "pickup_name=Restaurant" \
   -d "pickup_address=20 McAllister St, San Francisco, CA" \
-  -d "pickup_phone_number=4155555555" \
   -d "dropoff_name=John Doe" \
   -d "dropoff_address=101 Market St, San Francisco, CA" \
-  -d "dropoff_phone_number=4155556666" \
   -d "manifest=Thai Food Order" \
   -d "quote_id={quote_id}"
 
---- List Deliveries ---
-curl https://api.postmates.com/v1/customers/{customer_id}/deliveries \
-  -u "{api_key}:"
-
---- Get Delivery Status ---
-curl https://api.postmates.com/v1/customers/{customer_id}/deliveries/{delivery_id} \
-  -u "{api_key}:"
-
---- Cancel Delivery ---
-curl -X POST https://api.postmates.com/v1/customers/{customer_id}/deliveries/{delivery_id}/cancel \
-  -u "{api_key}:"
-
 =================================================================
-8. FIREBASE AUTHENTICATION CODE SNIPPETS
+9. FIREBASE AUTH (iOS)
 =================================================================
 
---- iOS Swift (Sign In with Email) ---
-import FirebaseAuth
-
+Sign In:
 Auth.auth().signIn(withEmail: email, password: password) { result, error in
-    if let error = error {
-        print("Error: \(error.localizedDescription)")
-        return
-    }
-
     guard let user = result?.user else { return }
-
     user.getIDToken { token, error in
-        if let token = token {
-            // Use this token for backend API calls
-            print("Firebase Token: \(token)")
-        }
+        // Use token for API calls
     }
 }
 
---- iOS Swift (Sign In with Google) ---
-import FirebaseAuth
-import GoogleSignIn
-
-GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { result, error in
-    guard let user = result?.user,
-          let idToken = user.idToken?.tokenString else {
-        return
-    }
-
-    let credential = GoogleAuthProvider.credential(
-        withIDToken: idToken,
-        accessToken: user.accessToken.tokenString
-    )
-
-    Auth.auth().signIn(with: credential) { result, error in
-        // Handle sign in
-    }
-}
-
---- iOS Swift (Get Current User Token) ---
-if let currentUser = Auth.auth().currentUser {
-    currentUser.getIDTokenForcingRefresh(true) { token, error in
-        if let token = token {
-            // Use this token for API requests
-            UserDefaults.standard.set(token, forKey: "firebaseToken")
-        }
+Get Token:
+Auth.auth().currentUser?.getIDTokenForcingRefresh(true) { token, error in
+    if let token = token {
+        // Include in API request header
     }
 }
 
 =================================================================
-9. MONITORING & LOGGING
+10. DEPLOYMENT CHECKLIST
 =================================================================
 
---- Firebase Analytics Events ---
-- user_signup: When user creates account
-- user_login: When user signs in
-- order_placed: When order is submitted
-- order_completed: When order is delivered
-- delivery_tracking_viewed: When user checks delivery status
-
---- Error Tracking ---
-Service: Sentry / Crashlytics
-Track: API failures, authentication errors, delivery failures
-
---- Performance Monitoring ---
-Service: Firebase Performance Monitoring
-Track: API response times, app startup time, screen rendering
-
-=================================================================
-10. TESTING CREDENTIALS
-=================================================================
-
---- Postmates Sandbox ---
-API Endpoint: https://api.postmates.com/v1/
-Test Customer ID: [SANDBOX_CUSTOMER_ID]
-Test API Key: [SANDBOX_API_KEY]
-
---- Firebase Test Accounts ---
-Test Email: test@eater.app
-Test Password: [TEST_PASSWORD]
-Test Phone: +1 555-123-4567
-
-=================================================================
-11. DEPLOYMENT CHECKLIST
-=================================================================
-
-☐ Set up Postmates developer account
-☐ Obtain Postmates API credentials
-☐ Create Firebase project
-☐ Enable Firebase Authentication providers
-☐ Set up Firestore database with security rules
-☐ Download GoogleService-Info.plist for iOS
-☐ Configure Firebase Cloud Messaging
-☐ Set up backend server (Node.js/Python)
-☐ Deploy backend to cloud platform
-☐ Configure environment variables
-☐ Set up Postmates webhook endpoint
-☐ Test authentication flow
-☐ Test order placement flow
-☐ Test delivery tracking
-☐ Set up error monitoring
-☐ Configure analytics
-☐ Test in production
+[ ] Postmates developer account
+[ ] Postmates API credentials
+[ ] Firebase project created
+[ ] Firebase Auth providers enabled
+[ ] Firestore database with security rules
+[ ] GoogleService-Info.plist downloaded
+[ ] Twilio account and phone number
+[ ] Backend server deployed
+[ ] Environment variables configured
+[ ] Webhook endpoints set up
+[ ] Test authentication flow
+[ ] Test order placement
+[ ] Test delivery tracking
 
 =================================================================
 END OF CONFIGURATION
