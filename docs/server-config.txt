@@ -3,32 +3,79 @@ EATER APP - SERVER CONFIGURATION
 =================================================================
 
 =================================================================
-1. UBER EATS API
+1. UBER EATS MARKETPLACE API
 =================================================================
 
-Endpoint: https://api.uber.com/v2/eats
+Base URL: https://api.uber.com/v1/eats
 Docs: https://developer.uber.com/docs/eats
+Postman: https://www.postman.com/uber/uber-eats-marketplace-api
 
 Auth:
-  Client ID: [YOUR_UBER_CLIENT_ID]
-  Client Secret: [YOUR_UBER_CLIENT_SECRET]
-  Type: OAuth 2.0
+  Type: Bearer Token (OAuth 2.0)
+  Header: Authorization: Bearer {access_token}
 
-Endpoints:
-  POST /stores/search
-  POST /orders
-  GET  /orders/{order_id}
-  POST /orders/{order_id}/cancel
+Key Endpoints:
 
-Rate Limits: Varies by endpoint
+Order Management:
+  GET    /stores/{store_id}/orders/{order_id}     # Get order details
+  POST   /stores/{store_id}/orders/{order_id}/accept_pos_order   # Accept order
+  POST   /stores/{store_id}/orders/{order_id}/deny_pos_order     # Deny order
+  POST   /stores/{store_id}/orders/{order_id}/cancel             # Cancel order
+
+Store Management:
+  GET    /stores/{store_id}                        # Get store details
+  PATCH  /stores/{store_id}/status                 # Update store status
+
+Menu Management:
+  GET    /stores/{store_id}/menus                  # Get menus
+  POST   /stores/{store_id}/menus                  # Create menu
+  PATCH  /stores/{store_id}/menus/{menu_id}        # Update menu
 
 Webhooks:
   URL: https://your-backend.com/api/webhooks/ubereats
-  Events: order.status_changed, order.cancelled
-  Secret: [YOUR_WEBHOOK_SECRET]
+  Events:
+    - orders.notification (new orders)
+    - orders.cancel
+    - orders.status_change
+
+Rate Limits: Check response headers (X-RateLimit-*)
 
 =================================================================
-2. FIREBASE
+2. UBER EATS ORDER FLOW
+=================================================================
+
+1. Receive Order Webhook
+   POST /webhooks/ubereats
+   Event: orders.notification
+
+2. Get Order Details
+   GET /stores/{store_id}/orders/{order_id}
+
+3. Accept Order
+   POST /stores/{store_id}/orders/{order_id}/accept_pos_order
+   Body: {
+     "reason": "",
+     "fields": {
+       "prep_time_estimated": 15
+     }
+   }
+
+4. Cancel Order (if needed)
+   POST /stores/{store_id}/orders/{order_id}/cancel
+   Body: {
+     "reason": "OUT_OF_ITEMS",
+     "cancel_description": "Item unavailable"
+   }
+
+Cancel Reasons:
+  - OUT_OF_ITEMS
+  - STORE_CLOSING
+  - STAFF_SHORTAGE
+  - TOO_BUSY
+  - DUPLICATE_ORDER
+
+=================================================================
+3. FIREBASE
 =================================================================
 
 Project:
@@ -47,11 +94,19 @@ iOS Config:
 
 Firestore Collections:
   users/{userId}
+    - email, displayName, phoneNumber, createdAt
+
   orders/{orderId}
+    - userId, cuisines, platform, status
+    - itemName, price, totalPrice
+    - uberEatsOrderId, uberEatsStoreId
+    - confirmationCode, timestamps
+
   deliveryAddresses/{userId}/addresses/{addressId}
+    - label, address, coordinates, isDefault
 
 =================================================================
-3. TWILIO (SMS)
+4. TWILIO (SMS)
 =================================================================
 
 Endpoint: https://api.twilio.com/2010-04-01/
@@ -60,8 +115,16 @@ Docs: https://www.twilio.com/docs/sms
 Auth:
   Account SID: [YOUR_TWILIO_ACCOUNT_SID]
   Auth Token: [YOUR_TWILIO_AUTH_TOKEN]
+  Type: Basic Auth
 
 Phone: +1[YOUR_TWILIO_NUMBER]
+
+Send SMS:
+  POST /Accounts/{AccountSid}/Messages.json
+  Body:
+    - To: +1234567890
+    - From: +1[YOUR_TWILIO_NUMBER]
+    - Body: "Message text"
 
 Use Cases:
   - Phone verification codes
@@ -72,7 +135,7 @@ Use Cases:
 Rate Limit: 100 req/sec
 
 =================================================================
-4. BACKEND SERVER
+5. BACKEND SERVER
 =================================================================
 
 Stack: Node.js + Express.js
@@ -86,6 +149,7 @@ Environment Variables:
   # Uber Eats
   UBER_CLIENT_ID=[YOUR_CLIENT_ID]
   UBER_CLIENT_SECRET=[YOUR_CLIENT_SECRET]
+  UBER_STORE_ID=[YOUR_STORE_ID]
   UBER_WEBHOOK_SECRET=[YOUR_SECRET]
 
   # Firebase
@@ -99,7 +163,7 @@ Environment Variables:
   TWILIO_PHONE_NUMBER=+1[YOUR_NUMBER]
 
 =================================================================
-5. API ENDPOINTS
+6. BACKEND API ENDPOINTS
 =================================================================
 
 Auth:
@@ -109,22 +173,23 @@ Auth:
   GET    /api/auth/user
 
 Orders:
-  POST   /api/orders
-  GET    /api/orders
-  GET    /api/orders/:id
-  DELETE /api/orders/:id
+  POST   /api/orders                    # Create order
+  GET    /api/orders                    # List user orders
+  GET    /api/orders/:id                # Get order details
+  POST   /api/orders/:id/accept         # Accept order
+  POST   /api/orders/:id/cancel         # Cancel order
+  DELETE /api/orders/:id                # Delete order record
 
 Delivery:
-  POST   /api/delivery/quote
-  POST   /api/delivery/create
-  GET    /api/delivery/:id
+  POST   /api/delivery/quote            # Get delivery quote
+  GET    /api/delivery/:id              # Get delivery status
 
 Webhooks:
-  POST   /api/webhooks/ubereats
-  POST   /api/webhooks/twilio
+  POST   /api/webhooks/ubereats         # Uber Eats order webhook
+  POST   /api/webhooks/twilio           # Twilio SMS status
 
 =================================================================
-6. FIRESTORE SECURITY RULES
+7. FIRESTORE SECURITY RULES
 =================================================================
 
 rules_version = '2';
@@ -139,61 +204,81 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow update: if request.auth != null && resource.data.userId == request.auth.uid;
     }
+
+    match /deliveryAddresses/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }
-
-=================================================================
-7. UBER EATS DELIVERY FLOW
-=================================================================
-
-1. User Authentication
-   → Firebase generates ID token
-   → App stores in Keychain
-
-2. Order Creation
-   → User selects cuisines
-   → Backend verifies token
-
-3. Delivery Quote
-   → Backend calls Uber Eats API
-   → Returns quote with cost and ETA
-
-4. Order Placement
-   → User confirms
-   → Backend creates Uber Eats order
-   → Saves to Firestore
-
-5. Order Tracking
-   → Uber Eats sends webhooks
-   → Backend updates Firestore
-   → Push notification to user
-
-6. Completion
-   → Uber Eats marks delivered
-   → Final status update
 
 =================================================================
 8. UBER EATS API EXAMPLES
 =================================================================
 
-Get Quote:
-curl -X POST https://api.uber.com/v2/eats/stores/search \
+Get Order Details:
+curl -X GET "https://api.uber.com/v1/eats/stores/{store_id}/orders/{order_id}" \
   -H "Authorization: Bearer {access_token}" \
-  -H "Content-Type: application/json" \
-  -d '{"latitude": 37.7749, "longitude": -122.4194}'
+  -H "Content-Type: application/json"
 
-Create Order:
-curl -X POST https://api.uber.com/v2/eats/orders \
+Accept Order:
+curl -X POST "https://api.uber.com/v1/eats/stores/{store_id}/orders/{order_id}/accept_pos_order" \
   -H "Authorization: Bearer {access_token}" \
   -H "Content-Type: application/json" \
   -d '{
-    "store_id": "store123",
-    "items": [{"id": "item456", "quantity": 1}],
-    "dropoff_address": "101 Market St, San Francisco, CA"
+    "reason": "",
+    "fields": {
+      "prep_time_estimated": 15
+    }
+  }'
+
+Cancel Order:
+curl -X POST "https://api.uber.com/v1/eats/stores/{store_id}/orders/{order_id}/cancel" \
+  -H "Authorization: Bearer {access_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "OUT_OF_ITEMS",
+    "cancel_description": "Item unavailable"
+  }'
+
+Deny Order:
+curl -X POST "https://api.uber.com/v1/eats/stores/{store_id}/orders/{order_id}/deny_pos_order" \
+  -H "Authorization: Bearer {access_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "STORE_CLOSING",
+    "explanation": "Store is closing"
   }'
 
 =================================================================
-9. FIREBASE AUTH (iOS)
+9. OAUTH 2.0 TOKEN FLOW
+=================================================================
+
+Get Access Token:
+curl -X POST "https://login.uber.com/oauth/v2/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id={client_id}" \
+  -d "client_secret={client_secret}" \
+  -d "grant_type=client_credentials" \
+  -d "scope=eats.store"
+
+Response:
+{
+  "access_token": "abc123...",
+  "token_type": "Bearer",
+  "expires_in": 2592000,
+  "scope": "eats.store"
+}
+
+Refresh Token:
+curl -X POST "https://login.uber.com/oauth/v2/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id={client_id}" \
+  -d "client_secret={client_secret}" \
+  -d "grant_type=refresh_token" \
+  -d "refresh_token={refresh_token}"
+
+=================================================================
+10. FIREBASE AUTH (iOS)
 =================================================================
 
 Sign In:
@@ -212,11 +297,13 @@ Auth.auth().currentUser?.getIDTokenForcingRefresh(true) { token, error in
 }
 
 =================================================================
-10. DEPLOYMENT CHECKLIST
+11. DEPLOYMENT CHECKLIST
 =================================================================
 
 [ ] Uber Eats developer account
-[ ] Uber Eats API credentials
+[ ] Uber Eats Marketplace API credentials
+[ ] Store ID from Uber Eats
+[ ] OAuth 2.0 tokens configured
 [ ] Firebase project created
 [ ] Firebase Auth providers enabled
 [ ] Firestore database with security rules
@@ -224,9 +311,9 @@ Auth.auth().currentUser?.getIDTokenForcingRefresh(true) { token, error in
 [ ] Twilio account and phone number
 [ ] Backend server deployed
 [ ] Environment variables configured
-[ ] Webhook endpoints set up
+[ ] Webhook endpoints set up (must be HTTPS)
 [ ] Test authentication flow
-[ ] Test order placement
+[ ] Test order acceptance/cancellation
 [ ] Test delivery tracking
 
 =================================================================

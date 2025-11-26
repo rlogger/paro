@@ -116,8 +116,8 @@ class OrderService {
     /// Base URL for the API (replace with your actual API endpoint)
     private let baseURL = "https://your-backend-server.com/api"
 
-    /// Uber Eats API base URL (for future direct integration if needed)
-    private let uberEatsBaseURL = "https://api.uber.com/v2/eats"
+    /// Uber Eats Marketplace API base URL
+    private let uberEatsBaseURL = "https://api.uber.com/v1/eats"
 
     /// URL session configuration
     private let session: URLSession
