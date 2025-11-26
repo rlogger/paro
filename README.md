@@ -5,11 +5,11 @@
 
 **Status:** Inactive Development - See known limitations
 
-POC: Simple 2-page mobile app with preset food ordering options based on cuisine selection. Backend API integration with Postmates for real-time delivery quotes and order placement.
+POC: Simple 2-page mobile app with preset food ordering options based on cuisine selection. Backend API integration with Uber Eats for real-time delivery quotes and order placement.
 
 ## ⚠️ Known Limitations
 
-**Third-Party API Access**: Delivery platform APIs (Uber Eats, Postmates, DoorDash) are not publicly available to individual developers. Access requires enterprise partnerships or formal commercial agreements, making this project non-deployable for personal use without alternative solutions.
+**Third-Party API Access**: Delivery platform APIs (Uber Eats, DoorDash) are not publicly available to individual developers. Access requires enterprise partnerships or formal commercial agreements, making this project non-deployable for personal use without alternative solutions.
 
 ## Screenshots
 
@@ -28,7 +28,7 @@ POC: Simple 2-page mobile app with preset food ordering options based on cuisine
 - Xcode 15.0+
 - iOS 17.0+
 - Firebase account
-- Postmates API credentials
+- Uber Eats API credentials
 
 ### Setup
 
@@ -45,7 +45,7 @@ POC: Simple 2-page mobile app with preset food ordering options based on cuisine
 
 3. **Configure server**
    - See [`docs/server-config.txt`](docs/server-config.txt) for complete backend setup
-   - Set up Postmates API credentials
+   - Set up Uber Eats API credentials
    - Deploy backend server
 
 4. **Build and run**
@@ -81,8 +81,7 @@ eaterr/
 
 ## Delivery Platform Integrations
 
-- **Postmates** (Primary - Active Integration)
-- Uber Eats (Considering)
+- **Uber Eats** (Primary - Active Integration)
 - Weedmaps (Considering)
 - Direct restaurant integrations (Considering)
 
@@ -93,7 +92,7 @@ eaterr/
 - **Authentication:** Firebase Auth
 - **Database:** Firestore
 - **Cloud Services:** Google Cloud Platform
-- **Delivery APIs:** Postmates API v1
+- **Delivery APIs:** Uber Eats API
 
 ## Contributing
 

@@ -116,8 +116,8 @@ class OrderService {
     /// Base URL for the API (replace with your actual API endpoint)
     private let baseURL = "https://your-backend-server.com/api"
 
-    /// Postmates API base URL (for future direct integration if needed)
-    private let postmatesBaseURL = "https://api.postmates.com/v1"
+    /// Uber Eats API base URL (for future direct integration if needed)
+    private let uberEatsBaseURL = "https://api.uber.com/v2/eats"
 
     /// URL session configuration
     private let session: URLSession
@@ -412,9 +412,9 @@ class OrderService {
     }
 
     /**
-     Gets a delivery quote from Postmates.
+     Gets a delivery quote from Uber Eats.
 
-     Requests a delivery quote from the backend, which queries Postmates API
+     Requests a delivery quote from the backend, which queries Uber Eats API
      for pricing and estimated delivery time.
 
      - Parameters:

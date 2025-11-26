@@ -337,7 +337,7 @@ Cmd + R (Run)
 
 4. **Configure Backend**
    - Deploy server for orders
-   - Add Postmates/Twilio APIs
+   - Add Uber Eats/Twilio APIs
 
 5. **TestFlight**
    - Archive app (Product → Archive)

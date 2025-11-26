@@ -3,28 +3,28 @@ EATER APP - SERVER CONFIGURATION
 =================================================================
 
 =================================================================
-1. POSTMATES API
+1. UBER EATS API
 =================================================================
 
-Endpoint: https://api.postmates.com/v1/
-Docs: https://postmates.com/developer/docs/
+Endpoint: https://api.uber.com/v2/eats
+Docs: https://developer.uber.com/docs/eats
 
 Auth:
-  Customer ID: [YOUR_POSTMATES_CUSTOMER_ID]
-  API Key: [YOUR_POSTMATES_API_KEY]
-  Type: Basic Authentication (API_KEY:)
+  Client ID: [YOUR_UBER_CLIENT_ID]
+  Client Secret: [YOUR_UBER_CLIENT_SECRET]
+  Type: OAuth 2.0
 
 Endpoints:
-  POST /customers/{id}/delivery_quotes
-  POST /customers/{id}/deliveries
-  GET  /customers/{id}/deliveries/{delivery_id}
-  POST /customers/{id}/deliveries/{delivery_id}/cancel
+  POST /stores/search
+  POST /orders
+  GET  /orders/{order_id}
+  POST /orders/{order_id}/cancel
 
-Rate Limits: 1000 req/min, burst 5000
+Rate Limits: Varies by endpoint
 
 Webhooks:
-  URL: https://your-backend.com/api/webhooks/postmates
-  Events: delivery.status, delivery.updated, delivery.delivered, delivery.canceled
+  URL: https://your-backend.com/api/webhooks/ubereats
+  Events: order.status_changed, order.cancelled
   Secret: [YOUR_WEBHOOK_SECRET]
 
 =================================================================
@@ -83,10 +83,10 @@ Environment Variables:
   NODE_ENV=production
   PORT=8080
 
-  # Postmates
-  POSTMATES_CUSTOMER_ID=[YOUR_ID]
-  POSTMATES_API_KEY=[YOUR_KEY]
-  POSTMATES_WEBHOOK_SECRET=[YOUR_SECRET]
+  # Uber Eats
+  UBER_CLIENT_ID=[YOUR_CLIENT_ID]
+  UBER_CLIENT_SECRET=[YOUR_CLIENT_SECRET]
+  UBER_WEBHOOK_SECRET=[YOUR_SECRET]
 
   # Firebase
   FIREBASE_PROJECT_ID=eater-app-[ID]
@@ -120,7 +120,7 @@ Delivery:
   GET    /api/delivery/:id
 
 Webhooks:
-  POST   /api/webhooks/postmates
+  POST   /api/webhooks/ubereats
   POST   /api/webhooks/twilio
 
 =================================================================
@@ -143,7 +143,7 @@ service cloud.firestore {
 }
 
 =================================================================
-7. POSTMATES DELIVERY FLOW
+7. UBER EATS DELIVERY FLOW
 =================================================================
 
 1. User Authentication
@@ -155,42 +155,42 @@ service cloud.firestore {
    → Backend verifies token
 
 3. Delivery Quote
-   → Backend calls Postmates API
+   → Backend calls Uber Eats API
    → Returns quote with cost and ETA
 
 4. Order Placement
    → User confirms
-   → Backend creates Postmates delivery
+   → Backend creates Uber Eats order
    → Saves to Firestore
 
 5. Order Tracking
-   → Postmates sends webhooks
+   → Uber Eats sends webhooks
    → Backend updates Firestore
    → Push notification to user
 
 6. Completion
-   → Postmates marks delivered
+   → Uber Eats marks delivered
    → Final status update
 
 =================================================================
-8. POSTMATES API EXAMPLES
+8. UBER EATS API EXAMPLES
 =================================================================
 
 Get Quote:
-curl -X POST https://api.postmates.com/v1/customers/{id}/delivery_quotes \
-  -u "{api_key}:" \
-  -d "pickup_address=20 McAllister St, San Francisco, CA" \
-  -d "dropoff_address=101 Market St, San Francisco, CA"
+curl -X POST https://api.uber.com/v2/eats/stores/search \
+  -H "Authorization: Bearer {access_token}" \
+  -H "Content-Type: application/json" \
+  -d '{"latitude": 37.7749, "longitude": -122.4194}'
 
-Create Delivery:
-curl -X POST https://api.postmates.com/v1/customers/{id}/deliveries \
-  -u "{api_key}:" \
-  -d "pickup_name=Restaurant" \
-  -d "pickup_address=20 McAllister St, San Francisco, CA" \
-  -d "dropoff_name=John Doe" \
-  -d "dropoff_address=101 Market St, San Francisco, CA" \
-  -d "manifest=Thai Food Order" \
-  -d "quote_id={quote_id}"
+Create Order:
+curl -X POST https://api.uber.com/v2/eats/orders \
+  -H "Authorization: Bearer {access_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "store_id": "store123",
+    "items": [{"id": "item456", "quantity": 1}],
+    "dropoff_address": "101 Market St, San Francisco, CA"
+  }'
 
 =================================================================
 9. FIREBASE AUTH (iOS)
@@ -215,8 +215,8 @@ Auth.auth().currentUser?.getIDTokenForcingRefresh(true) { token, error in
 10. DEPLOYMENT CHECKLIST
 =================================================================
 
-[ ] Postmates developer account
-[ ] Postmates API credentials
+[ ] Uber Eats developer account
+[ ] Uber Eats API credentials
 [ ] Firebase project created
 [ ] Firebase Auth providers enabled
 [ ] Firestore database with security rules

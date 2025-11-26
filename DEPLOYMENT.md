@@ -126,7 +126,7 @@ All tests should pass ✅. If any fail, review the error messages.
 ## Backend Server Setup (Required for Production)
 
 The app requires a backend server for:
-- Order processing (Postmates API integration)
+- Order processing (Uber Eats API integration)
 - SMS notifications (Twilio integration)
 - Phone authentication
 
@@ -200,7 +200,7 @@ Product → Archive
 
 ### Staging
 - Point to staging backend server
-- Use test Postmates/Twilio accounts
+- Use test Uber Eats/Twilio accounts
 - Enable debug logging
 
 ### Production

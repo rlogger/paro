@@ -261,7 +261,7 @@ import FirebaseCore
 ### 2. Setup Backend
 ```bash
 # Deploy Node.js server
-# Configure Postmates API
+# Configure Uber Eats API
 # Setup Twilio for SMS
 ```
 

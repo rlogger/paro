@@ -246,7 +246,7 @@ struct OrderResponse: Codable {
 // MARK: - Delivery Quote
 
 /**
- Represents a delivery quote from Postmates.
+ Represents a delivery quote from Uber Eats.
 
  Contains pricing and timing information for a potential delivery.
  Used to show users the cost and estimated delivery time before confirming order.

@@ -1,13 +1,13 @@
 # Architecture
 
-Model-View-Service pattern with SwiftUI, Firebase Auth, and Postmates delivery.
+Model-View-Service pattern with SwiftUI, Firebase Auth, and Uber Eats delivery.
 
 ## Stack
 
 - **UI:** SwiftUI + SwiftData
 - **Auth:** Firebase Authentication
 - **Backend:** Custom API + Firestore
-- **Delivery:** Postmates API
+- **Delivery:** Uber Eats API
 
 ## Layers
 
@@ -29,7 +29,7 @@ Model-View-Service pattern with SwiftUI, Firebase Auth, and Postmates delivery.
 
 **Auth:** User signs in → Firebase token → Stored in Keychain → Added to API requests
 
-**Order:** Select cuisines → OrderService → Backend → Postmates → Firestore → Confirmation
+**Order:** Select cuisines → OrderService → Backend → Uber Eats → Firestore → Confirmation
 
 ## File Structure
 

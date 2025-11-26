@@ -19,19 +19,19 @@ Food delivery app with simplified ordering through preset cuisine selections.
 └────┬──────────┬─────────┘
      │          │
      ▼          ▼
-┌─────────┐  ┌──────────┐
-│Firebase │  │Postmates │
-│Auth/DB  │  │   API    │
-└─────────┘  └──────────┘
+┌─────────┐  ┌───────────┐
+│Firebase │  │Uber Eats  │
+│Auth/DB  │  │    API    │
+└─────────┘  └───────────┘
 ```
 
 ## Core Flow
 
 **Auth:** User signs in → Firebase token → Stored in Keychain → Included in API requests
 
-**Order:** Cuisines selected → Backend → Postmates quote → User confirms → Delivery created → Saved to Firestore → Confirmation shown
+**Order:** Cuisines selected → Backend → Uber Eats quote → User confirms → Delivery created → Saved to Firestore → Confirmation shown
 
-**Tracking:** Postmates webhooks → Backend updates Firestore → Push notification sent
+**Tracking:** Uber Eats webhooks → Backend updates Firestore → Push notification sent
 
 ## Tech Stack
 
@@ -43,7 +43,7 @@ Food delivery app with simplified ordering through preset cuisine selections.
 **Backend:**
 - Node.js, Express.js
 - Firebase Admin SDK
-- Postmates API integration
+- Uber Eats API integration
 
 **Data:**
 - Firestore (users, orders, addresses)
@@ -59,7 +59,7 @@ email, displayName, phoneNumber, preferences, stats
 **orders/{orderId}**
 ```
 userId, cuisines, platform, status, itemName, price,
-deliveryAddress, postmatesDeliveryId, confirmationCode, timestamps
+deliveryAddress, uberEatsDeliveryId, confirmationCode, timestamps
 ```
 
 **deliveryAddresses/{userId}/addresses/{addressId}**
@@ -81,8 +81,8 @@ label, address, coordinates, isDefault
 POST   /api/auth/login
 POST   /api/orders              # Create order
 GET    /api/orders/:id          # Order status
-POST   /api/delivery/quote      # Postmates quote
-POST   /api/webhooks/postmates  # Status updates
+POST   /api/delivery/quote      # Uber Eats quote
+POST   /api/webhooks/ubereats   # Status updates
 ```
 
 ## Performance
@@ -93,16 +93,16 @@ POST   /api/webhooks/postmates  # Status updates
 - Request timeout: 30s
 - Auto-scaling backend
 
-## Postmates Flow
+## Uber Eats Flow
 
 1. Get delivery quote (pickup → dropoff)
 2. User confirms order
 3. Create delivery with quote_id
-4. Postmates assigns courier
+4. Uber Eats assigns courier
 5. Webhooks update order status
 6. Push notifications to user
 
-**Status states:** pending → pickup → pickup_complete → dropoff → delivered
+**Status states:** pending → accepted → preparing → pickup → delivering → delivered
 
 ## Monitoring
 
