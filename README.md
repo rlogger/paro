@@ -73,12 +73,6 @@ eaterr/
     └── server-config.txt       # Server-side configuration reference
 ```
 
-## Documentation
-
-- **[System Design](docs/SYSTEM_DESIGN.md)** - Complete system architecture, data flow, and technical specifications
-- **[Firebase Setup](docs/FIREBASE_SETUP.md)** - Step-by-step Firebase integration guide
-- **[Server Configuration](docs/server-config.txt)** - Backend API setup and credentials reference
-
 ## Delivery Platform Integrations
 
 - **Uber Eats** (Primary - Active Integration)
@@ -93,10 +87,6 @@ eaterr/
 - **Database:** Firestore
 - **Cloud Services:** Google Cloud Platform
 - **Delivery APIs:** Uber Eats API
-
-## Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## License
 
