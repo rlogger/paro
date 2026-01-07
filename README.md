@@ -9,7 +9,7 @@ POC: Simple 2-page mobile app with preset food ordering options based on cuisine
 
 ## ⚠️ Known Limitations
 
-**Third-Party API Access**: Delivery platform APIs (Uber Eats, DoorDash) are not publicly available to individual developers. Access requires enterprise partnerships or formal commercial agreements, making this project non-deployable for personal use without alternative solutions.
+**Third-Party API Access**: Delivery platform APIs (Uber Eats, DoorDash) are not publicly available to individual developers. Access requires enterprise partnerships or formal commercial agreements.
 
 ## Screenshots
 
