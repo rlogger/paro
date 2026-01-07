@@ -1,5 +1,5 @@
 ## design: removes pâro when ordering food delivery
-**pâro** n. the feeling that everything you do is always somehow wrong
+**pâro** n. the feeling that everything you do is always somehow wrong: https://www.youtube.com/watch?v=w7l2hUp0CkQ
 
 <br>
 
